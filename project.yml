@@ -1,0 +1,56 @@
+name: daisyiOS
+options:
+  bundleIdPrefix: com.godmodeai
+  deploymentTarget:
+    iOS: "27.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "27.0"
+targets:
+  daisyiOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/daisyiOS
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.godmodeai.daisyiOS
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: daisyiOS
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "daisyiOS analysiert deine Fotos und Videos, um den Speicherbedarf anzuzeigen. Deine Medien werden nicht übertragen."
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: 1
+        CODE_SIGN_STYLE: Automatic
+  daisyiOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Sources/daisyiOSTests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: daisyiOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  daisyiOS:
+    build:
+      targets:
+        daisyiOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - daisyiOSTests

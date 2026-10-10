@@ -1,0 +1,32 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# XcodeGen (project.xcodeproj wird neu generiert)
+*.xcodeproj
+
+# Accordion
+.playground
+
+# macOS
+.DS_Store
+
+# fastlane
+fastlane/report.xml
+fastlane/screenshots
+
+# Secrets
+*.p12
+*.key
+*.pem
