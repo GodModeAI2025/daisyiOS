@@ -30,3 +30,7 @@ fastlane/screenshots
 *.p12
 *.key
 *.pem
+
+# Local signed release packages
+release/artifacts/
+release/status.json

@@ -1,0 +1,44 @@
+[
+  {
+    "path": "ipad/01-speicher-entdecken.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "source": "Actual iOS 27 simulator capture; real local example text files; native folder-picker scan"
+  },
+  {
+    "path": "ipad/02-dateien-verwalten.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "source": "Actual iOS 27 simulator capture; real local example text files; native folder-picker scan"
+  },
+  {
+    "path": "ipad/03-ordner-auswaehlen.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "source": "Actual iOS 27 simulator capture; real local example text files; native folder-picker scan"
+  },
+  {
+    "path": "iphone/01-speicher-entdecken.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "source": "Actual iOS 27 simulator capture; real local example text files; native folder-picker scan"
+  },
+  {
+    "path": "iphone/02-dateien-verwalten.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "source": "Actual iOS 27 simulator capture; real local example text files; native folder-picker scan"
+  },
+  {
+    "path": "iphone/03-ordner-auswaehlen.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "source": "Actual iOS 27 simulator capture; real local example text files; native folder-picker scan"
+  }
+]

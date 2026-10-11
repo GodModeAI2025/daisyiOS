@@ -32,7 +32,7 @@ Am 11. Oktober 2026 mit Xcode 27.0 über Xcode-MCP gebaut und im iOS-27-Simulato
 
 Speicherübersicht, Analyse-Tab, Scan eigener Daten, Ergebnisnavigation und Auswahl eines Sunburst-Bereichs wurden im Simulator geprüft. Die Xcode-MCP-Geräteinteraktion meldete widersprüchlich „Session not found“ und ein belegtes Gerät; die Bedienprüfung erfolgte deshalb über Device Hub und Simulator-Screenshots. Quick Look, Dateien-Browser, animierte Auswahl sowie Abbrechen und Bestätigen der Löschabfrage sind mit eigenen Testdateien geprüft. Tatsächliches Löschen und die Aktualisierung der übergeordneten Größen wurden zusätzlich per Dateisystem-Rückprüfung bestätigt.
 
-Dark Mode und die größte Accessibility-Schrift wurden visuell geprüft; das Aktionspanel bleibt scrollbar. Die Simulatorprüfung ersetzt keine Prüfung auf einem physischen Gerät mit realen Cloud-/USB-Dateianbietern. Signierung, TestFlight und App-Store-Veröffentlichung sind noch offen.
+Dark Mode und die größte Accessibility-Schrift wurden visuell geprüft; das Aktionspanel bleibt scrollbar. Die Simulatorprüfung ersetzt keine Prüfung auf einem physischen Gerät mit realen Cloud-/USB-Dateianbietern. Version 1.0 (1) wurde am 11. Oktober 2026 signiert und erfolgreich zu App Store Connect hochgeladen. Apple meldete anschließend Verarbeitung; TestFlight-Gruppenzuordnung und App-Review-Einreichung sind noch nicht bestätigt. Manuelle Veröffentlichung ist vorgesehen und im Portal noch einzustellen.
 
 ## Weiterentwicklung
 

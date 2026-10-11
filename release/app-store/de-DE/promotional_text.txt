@@ -1,0 +1,1 @@
+Entdecke den Speicherbedarf deiner Ordner als leuchtendes Ringdiagramm. Prüfe Dateien mit Quick Look und entferne ausgewählte Inhalte mit Sicherheitsabfrage.

@@ -1,0 +1,25 @@
+Sieh, was in deinen Ordnern Platz braucht.
+daisyiOS macht Speicherbedarf sichtbar – mit einem interaktiven Ringdiagramm, klaren Größenangaben und direkten Dateiaktionen.
+
+ORDNER ENTDECKEN
+Wähle einen Ordner über die Dateien-Auswahl: auf deinem Gerät, in iCloud Drive oder auf einem verbundenen Datenträger, sofern der Dateianbieter ihn bereitstellt. Erkunde Unterordner und finde große Einträge in der nach Größe sortierten Liste.
+
+SPEICHER SICHTBAR MACHEN
+Tippe einen Bereich im Ringdiagramm. Die Auswahl hebt sich hervor und zeigt ihren Speicherbedarf. Suche nach Datei- und Ordnernamen oder öffne den nächsten Ordner.
+
+DATEIEN PRÜFEN UND AUFRÄUMEN
+Starte Quick Look bei unterstützten Dateien. Öffne die native Dateien-Auswahl am gewünschten Speicherort, soweit der Anbieter das unterstützt. Lösche ausgewählte Dateien oder Ordner erst nach einer ausdrücklichen Sicherheitsabfrage. Die Analyse aktualisiert anschließend ihre Größen und Einträge.
+
+GERÄTESPEICHER IM BLICK
+Die Übersicht zeigt Gesamtgröße, belegten und freien Speicher sowie die vom System geschätzte verfügbare Kapazität für wichtige Daten.
+
+LOKAL ANALYSIEREN
+Die App benötigt kein Benutzerkonto und überträgt keine Analyseergebnisse. Cloud-Dateianbieter können Dateien zum Öffnen oder Analysieren bereitstellen oder laden.
+
+WICHTIG ZU WISSEN
+• iOS schützt die Daten anderer Apps. daisyiOS analysiert eigene App-Daten und ausdrücklich freigegebene Ordner.
+• Ein vollständiger Scan des gesamten iPhone-Dateisystems ist nicht möglich.
+• Systemkapazitäten sind Schätzungen. Das Löschen auf einem externen Datenträger betrifft dessen Speicher; synchronisierte Löschungen können andere Geräte betreffen.
+• Der Dateianbieter kann den gewünschten Startort der Dateien-Auswahl ignorieren.
+
+Für iPhone und iPad ab iOS 27.
