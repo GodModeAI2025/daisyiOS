@@ -102,6 +102,7 @@ struct FolderContents: View {
     @State private var filter: EntryFilter = .all
     @State private var sort: EntrySort = .largest
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 16) {
             Text("Inhalt").font(.title3.bold())
@@ -136,7 +137,10 @@ struct FolderContents: View {
             ForEach(visibleChildren) { child in
                 HStack(alignment: .top, spacing: 10) {
                     if selecting { SelectionCheckbox(node: child, selection: batch) }
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
+                    (typeSize.isAccessibilitySize
+                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+                     : AnyLayout(HStackLayout(spacing: 8))) {
                     if child.isDirectory {
                         NavigationLink { FolderDetailView(node: child, result: result) } label: {
                             HStack {
@@ -154,9 +158,16 @@ struct FolderContents: View {
                             .buttonStyle(.plain).frame(minHeight: 44)
                             .accessibilityHint("Zeigt Vorschau und Dateiaktionen")
                     }
-                    Button { select(child) } label: {
-                        Label(child.isDirectory ? "Ordneraktionen anzeigen" : "Dateiaktionen anzeigen", systemImage: "ellipsis.circle")
-                    }.font(.subheadline).buttonStyle(OrbitActionStyle())
+                    if child.isDirectory {
+                        Button { select(child) } label: {
+                            Text("Details").font(.subheadline)
+                                .padding(.horizontal, 8).frame(minHeight: 44)
+                                .contentShape(Rectangle())
+                        }.buttonStyle(.plain).foregroundStyle(.tint)
+                            .accessibilityLabel("Details zu \(child.name)")
+                            .accessibilityHint("Zeigt Größe, Speicherort und verfügbare Aktionen")
+                    }
+                    }
                     Divider()
                 }
                 }
