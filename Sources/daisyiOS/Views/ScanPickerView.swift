@@ -13,6 +13,9 @@ final class ScanModel {
     var scannedFolderName: String?
     var savedFolders: [AccessStore.Folder] = []
     var cancelled = false
+    var startedAt = Date()
+    var lastUpdate = Date()
+    private var scanID = UUID()
 
     func loadFolders() async { savedFolders = await AccessStore.shared.folders }
 
@@ -25,14 +28,6 @@ final class ScanModel {
     private var accessURL: URL?
     private var accessLease: FolderAccessLease?
 
-    func scanAppContainer() {
-        guard !isScanning else { return }
-        accessLease = nil
-        accessURL = nil
-        let container = URL(fileURLWithPath: NSHomeDirectory())
-        startScan(of: container, folderName: "App-Container")
-    }
-
     func scanFolder(_ url: URL) {
         guard !isScanning else { return }
         accessLease = FolderAccessLease(url: url)
@@ -41,11 +36,20 @@ final class ScanModel {
     }
 
     func cancel() {
+        scanID = UUID()
         cancelled = true
         scanTask?.cancel()
+        scanTask = nil
+        isScanning = false
+        accessLease = nil
     }
 
     private func startScan(of url: URL, folderName: String) {
+        scanID = UUID()
+        let currentID = scanID
+        let lease = accessLease
+        startedAt = Date()
+        lastUpdate = startedAt
         cancelled = false
         isScanning = true
         progress = ScanProgress()
@@ -54,14 +58,16 @@ final class ScanModel {
         scannedFolderName = folderName
 
         scanTask = Task { [weak self] in
+            defer { withExtendedLifetime(lease) {} }
             let engine = ScanEngine()
-            for await event in await engine.scan(url) {
-                guard let self else { return }
+            for await event in await engine.scan(url, accessLease: lease) {
+                guard let self, self.scanID == currentID, !Task.isCancelled else { return }
                 switch event {
                 case .progress(let progress):
                     self.progress = progress
+                    self.lastUpdate = Date()
                 case .finished(let node):
-                    self.result = ScanResult(root: node, isAppContainer: url.standardizedFileURL == URL(fileURLWithPath: NSHomeDirectory()).standardizedFileURL, accessLease: self.accessLease)
+                    self.result = ScanResult(root: node, isAppContainer: url.standardizedFileURL == URL(fileURLWithPath: NSHomeDirectory()).standardizedFileURL, accessLease: lease, unreadableEntries: self.progress?.unreadableEntries ?? 0)
                     if let accessURL = self.accessURL {
                         do {
                             try await AccessStore.shared.add(name: folderName, url: accessURL)
@@ -72,7 +78,7 @@ final class ScanModel {
                     self.errorMessage = error.localizedDescription
                 }
             }
-            self?.finishScan()
+            if self?.scanID == currentID { self?.finishScan() }
         }
     }
 
@@ -85,43 +91,32 @@ final class ScanModel {
 struct ScanPickerView: View {
     @State private var model = ScanModel()
     @State private var showFolderPicker = false
+    @State private var showResult = false
 
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("DEIN DIGITALER KOSMOS", systemImage: "sparkles").font(.caption.weight(.semibold)).foregroundStyle(.indigo)
-                        Text("Finde, was Raum braucht.").font(.title.bold()).fontDesign(.rounded)
-                        Text("Ein Ordner. Ein Laufwerk. Eine neue Perspektive auf deine Daten.").foregroundStyle(.secondary)
-                    }.padding(.vertical, 12).listRowBackground(Color.clear)
-                }
-                Section("Analyse starten") {
-                    Button {
-                        model.scanAppContainer()
-                    } label: {
-                        Label("Eigene App-Daten", systemImage: "shippingbox")
+                if !model.isScanning {
+                    Section {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label("DEIN DIGITALER KOSMOS", systemImage: "sparkles").font(.caption.weight(.semibold)).foregroundStyle(.indigo)
+                            Text("Was möchtest du analysieren?").font(.title.bold()).fontDesign(.rounded)
+                            Text("Ein Ordner. Ein Laufwerk. Eine neue Perspektive auf deine Daten.").foregroundStyle(.secondary)
+                        }.padding(.vertical, 12).listRowBackground(Color.clear)
                     }
-                    .disabled(model.isScanning)
-
-                    Button {
-                        showFolderPicker = true
-                    } label: {
-                        Label("Ordner oder Datenträger wählen", systemImage: "externaldrive.badge.plus")
-                    }
-                    .disabled(model.isScanning)
-                }
-
-                if model.isScanning, let progress = model.progress {
-                    Section("Fortschritt") {
-                        ProgressView("Ordner wird analysiert …")
-                        LabeledContent("Dateien", value: "\(progress.filesScanned)")
-                        LabeledContent("Ordner", value: "\(progress.directoriesScanned)")
-                        LabeledContent("Gelesen", value: progress.bytesScanned.formattedBytes)
-                        LabeledContent("Zeit", value: progress.elapsed.formattedDuration)
-                        Button("Abbrechen", role: .cancel) {
-                            model.cancel()
+                    Section("Analyse starten") {
+                        Button {
+                            showFolderPicker = true
+                        } label: {
+                            Label("Ordner oder Datenträger wählen", systemImage: "externaldrive.badge.plus")
                         }
+                        .disabled(model.isScanning)
+                    }
+
+                }
+                if model.isScanning {
+                    Section {
+                        ScanActivityView(model: model)
                     }
                 }
 
@@ -134,6 +129,12 @@ struct ScanPickerView: View {
 
                 if model.cancelled, !model.isScanning {
                     Section { Label("Scan abgebrochen", systemImage: "stop.circle") }
+                }
+                if let progress = model.progress, !model.isScanning, progress.unreadableEntries > 0 {
+                    Section {
+                        Label("Analyse unvollständig", systemImage: "exclamationmark.triangle")
+                        Text("\(progress.unreadableEntries) Einträge konnten vom Dateianbieter nicht gelesen werden. Die angezeigte Größe enthält nur erreichbare Dateien.")
+                    }
                 }
                 if let result = model.result {
                     let root = result.root
@@ -167,11 +168,53 @@ struct ScanPickerView: View {
 
             }
             .cosmicScreen()
-            .navigationTitle("Entdecken")
+            .navigationTitle("OrbitDisk")
+            .navigationDestination(isPresented: $showResult) {
+                if let result = model.result {
+                    FolderDetailView(node: result.root, title: model.scannedFolderName, result: result)
+                }
+            }
+            .onChange(of: model.isScanning) { _, scanning in
+                if !scanning, model.result != nil, !model.cancelled { showResult = true }
+            }
             .task { await model.loadFolders() }
             .sheet(isPresented: $showFolderPicker) {
                 LocationBrowser(onSelect: { url in model.scanFolder(url) })
             }
+        }
+    }
+}
+
+struct ScanActivityView: View {
+    let model: ScanModel
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 16) {
+                    ProgressView().controlSize(.large).tint(.indigo)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Analyse läuft").font(.headline)
+                        Text(model.scannedFolderName ?? "Ordner").foregroundStyle(.secondary)
+                    }
+                }
+                Text(context.date.timeIntervalSince(model.lastUpdate) > 5
+                     ? "Warten auf den Dateianbieter … Du kannst die Analyse abbrechen."
+                     : "Dateien und Unterordner werden erfasst …")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                let progress = model.progress ?? ScanProgress()
+                LabeledContent("Dateien", value: progress.filesScanned.formatted())
+                LabeledContent("Ordner", value: progress.directoriesScanned.formatted())
+                LabeledContent("Erfasst", value: progress.bytesScanned.formattedBytes)
+                LabeledContent("Laufzeit", value: context.date.timeIntervalSince(model.startedAt).formattedDuration)
+                if !progress.currentPath.isEmpty {
+                    Text(progress.currentPath).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                }
+                if progress.unreadableEntries > 0 {
+                    Text("\(progress.unreadableEntries) nicht lesbare Einträge").font(.footnote)
+                }
+                Button("Analyse abbrechen", role: .cancel) { model.cancel() }
+                    .buttonStyle(.bordered).controlSize(.large)
+            }.padding(.vertical, 8)
         }
     }
 }
@@ -221,7 +264,7 @@ struct FileRowLabel: View {
     }
 }
 
-final class FolderAccessLease {
+final class FolderAccessLease: @unchecked Sendable {
     let url: URL
     let acquired: Bool
     init(url: URL) { self.url = url; acquired = url.startAccessingSecurityScopedResource() }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct RingSegment: Identifiable {
+struct RingSegment: Identifiable, Sendable {
     var id: UUID { node.id }
     let node: FileNode
     let start: Double
@@ -14,12 +14,20 @@ struct SunburstChart: View {
     @Binding var selected: FileNode?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    @State private var cachedSegments: [RingSegment] = []
+    @State private var preparing = true
     private static let palette: [Color] = [.indigo, .cyan, .pink, .teal, .orange, .purple]
     var body: some View {
         GeometryReader { proxy in
-            let segments = Self.segments(for: root)
+            let segments = cachedSegments
             ZStack {
                 Circle().fill(.indigo.opacity(0.13)).blur(radius: 24).padding(25)
+                ForEach(0..<3) { depth in
+                    RingWedge(start: -.pi / 2, end: 3 * .pi / 2,
+                              innerFraction: 0.39 + Double(depth) * 0.19,
+                              outerFraction: 0.57 + Double(depth) * 0.19)
+                        .fill(.secondary.opacity(0.12))
+                }
                 ForEach(segments) { segment in
                     let active = selected?.id == segment.node.id
                     RingWedge(start: segment.start, end: segment.end,
@@ -38,6 +46,10 @@ struct SunburstChart: View {
                         .accessibilityHidden(true)
                 }
                 VStack(spacing: 5) {
+                    if preparing {
+                        ProgressView().controlSize(.large)
+                        Text("Diagramm wird aufgebaut …").font(.caption).multilineTextAlignment(.center)
+                    } else {
                     Image(systemName: selected == nil ? "sparkles" : selected!.isDirectory ? "folder.fill" : "doc.fill")
                         .font(.title3).foregroundStyle(.indigo)
                     if !typeSize.isAccessibilitySize {
@@ -46,7 +58,17 @@ struct SunburstChart: View {
                         Text(selected == nil ? "Gesamt" : "Ausgewählt")
                             .font(.caption).foregroundStyle(.secondary)
                     }
+                    }
                 }.frame(width: min(proxy.size.width, proxy.size.height) * 0.35)
+            }
+            .task(id: "\(root.id)-\(root.aggregateSize)-\(root.fileCount)-\(root.directoryCount)-\(root.children.count)") {
+                preparing = true
+                let snapshot = root
+                let worker = Task.detached(priority: .userInitiated) { Self.segments(for: snapshot) }
+                let computed = await worker.value
+                guard !Task.isCancelled else { return }
+                cachedSegments = computed
+                preparing = false
             }
             .contentShape(Rectangle())
             .onTapGesture { point in
@@ -77,8 +99,10 @@ struct SunburstChart: View {
             for (index, child) in children.enumerated() {
                 let next = angle + (end - start) * Double(child.aggregateSize) / total
                 let colorIndex = color ?? index
-                result.append(RingSegment(node: child, start: angle, end: next, depth: depth, colorIndex: colorIndex))
-                append(child, start: angle, end: next, depth: depth + 1, color: colorIndex)
+                if next - angle >= 0.04 {
+                    result.append(RingSegment(node: child, start: angle, end: next, depth: depth, colorIndex: colorIndex))
+                    append(child, start: angle, end: next, depth: depth + 1, color: colorIndex)
+                }
                 angle = next
             }
         }

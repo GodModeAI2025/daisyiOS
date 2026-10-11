@@ -95,4 +95,48 @@ final class ScanEngineTests: XCTestCase {
         }
         XCTAssertTrue(failed)
     }
+    func testLargeFlatFolderIsCompleteAndReportsProgress() async throws {
+        for index in 0..<5000 {
+            try Data([1]).write(to: tempDir.appending(path: "file-\(index).log"))
+        }
+        var lastProgress = ScanProgress()
+        var sawProgressBeforeCompletion = false
+        var root: FileNode?
+        for await event in await ScanEngine().scan(tempDir) {
+            switch event {
+            case .progress(let progress):
+                if progress.filesScanned < 5000 {
+                    sawProgressBeforeCompletion = true
+                }
+                lastProgress = progress
+            case .finished(let node): root = node
+            case .failed(let error): XCTFail("\(error)")
+            }
+        }
+        XCTAssertEqual(root?.fileCount, 5000)
+        XCTAssertEqual(root?.children.count, 5000)
+        XCTAssertEqual(lastProgress.filesScanned, 5000)
+        XCTAssertEqual(lastProgress.unreadableEntries, 0)
+        XCTAssertTrue(sawProgressBeforeCompletion)
+    }
+
+    func testCancellationDoesNotPublishCompletedResult() async throws {
+        for index in 0..<1000 {
+            try Data([1]).write(to: tempDir.appending(path: "file-\(index)"))
+        }
+        let url = try XCTUnwrap(tempDir)
+        let consumer = Task {
+            var finished = false
+            for await event in await ScanEngine().scan(url) {
+                if case .progress = event {
+                    withUnsafeCurrentTask { $0?.cancel() }
+                }
+                if case .finished = event { finished = true }
+            }
+            return finished
+        }
+        let finished = await consumer.value
+        XCTAssertFalse(finished)
+    }
+
 }

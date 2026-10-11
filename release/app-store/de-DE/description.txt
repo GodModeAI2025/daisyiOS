@@ -7,19 +7,19 @@ Wähle einen Ordner über die Dateien-Auswahl: auf deinem Gerät, in iCloud Driv
 SPEICHER SICHTBAR MACHEN
 Tippe einen Bereich im Ringdiagramm. Die Auswahl hebt sich hervor und zeigt ihren Speicherbedarf. Suche nach Datei- und Ordnernamen oder öffne den nächsten Ordner.
 
+ANALYSE MIT FORTSCHRITT
+Die Ladeanzeige zeigt erfasste Dateien, Ordner und Laufzeit. Die Analyse lässt sich abbrechen. Nicht lesbare Einträge werden ausdrücklich gemeldet. Es gibt keine feste Dateigrenze. Sehr kleine Diagrammsegmente werden grau dargestellt; alle lesbaren Einträge stehen in der Liste.
+
 DATEIEN PRÜFEN UND AUFRÄUMEN
 Starte Quick Look bei unterstützten Dateien. Öffne die native Dateien-Auswahl am gewünschten Speicherort, soweit der Anbieter das unterstützt. Lösche ausgewählte Dateien oder Ordner erst nach einer ausdrücklichen Sicherheitsabfrage. Die Analyse aktualisiert anschließend ihre Größen und Einträge.
-
-GERÄTESPEICHER IM BLICK
-Die Übersicht zeigt Gesamtgröße, belegten und freien Speicher sowie die vom System geschätzte verfügbare Kapazität für wichtige Daten.
 
 LOKAL ANALYSIEREN
 Die App benötigt kein Benutzerkonto und überträgt keine Analyseergebnisse. Cloud-Dateianbieter können Dateien zum Öffnen oder Analysieren bereitstellen oder laden.
 
 WICHTIG ZU WISSEN
-• iOS schützt die Daten anderer Apps. OrbitDisk analysiert eigene App-Daten und ausdrücklich freigegebene Ordner.
+• iOS schützt die Daten anderer Apps. OrbitDisk analysiert ausdrücklich freigegebene Ordner.
 • Ein vollständiger Scan des gesamten iPhone-Dateisystems ist nicht möglich.
-• Systemkapazitäten sind Schätzungen. Das Löschen auf einem externen Datenträger betrifft dessen Speicher; synchronisierte Löschungen können andere Geräte betreffen.
+• Das Löschen auf einem externen Datenträger betrifft dessen Speicher; synchronisierte Löschungen können andere Geräte betreffen.
 • Der Dateianbieter kann den gewünschten Startort der Dateien-Auswahl ignorieren.
 
 Für iPhone und iPad ab iOS 27.

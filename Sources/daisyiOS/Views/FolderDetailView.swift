@@ -20,11 +20,17 @@ struct FolderDetailView: View {
             ScrollView {
                 if let current = result.find(node.url) {
                     VStack(spacing: 20) {
+                        if result.unreadableEntries > 0 {
+                            Label("Unvollständig: \(result.unreadableEntries) Einträge nicht lesbar", systemImage: "exclamationmark.triangle")
+                                .font(.subheadline).cosmicCard()
+                        }
                         VStack(spacing: 12) {
                             Label("DEIN SPEICHER, NEU GESEHEN", systemImage: "sparkles")
                                 .font(.caption.weight(.semibold)).foregroundStyle(.indigo)
                             SunburstChart(root: current, selected: selection).frame(height: 300)
-                            Text("Tippe einen Bereich, um ihn zu entdecken.")
+                            Label("Grau: sehr kleine Einträge und Ordnerbelegung", systemImage: "circle.fill")
+                                .font(.caption).foregroundStyle(.secondary)
+                            Text("Tippe einen Bereich, um ihn zu entdecken. Sehr kleine Einträge stehen vollständig in der Liste.")
                                 .font(.subheadline).foregroundStyle(.secondary)
                             Text("\(current.fileCount) Dateien · \(max(0, current.directoryCount - 1)) Ordner")
                                 .font(.subheadline).monospacedDigit()
@@ -63,16 +69,18 @@ struct FolderContents: View {
     let result: ScanResult
     let query: String
     @Binding var selected: FileNode?
+    @State private var visibleChildren: [FileNode] = []
+    @State private var preparing = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 16) {
             Text("Inhalt").font(.title3.bold())
             Text("Nach Speicherbedarf sortiert").font(.subheadline).foregroundStyle(.secondary)
-            let children = node.children.sorted { $0.aggregateSize > $1.aggregateSize }.filter { query.isEmpty || $0.name.localizedStandardContains(query) }
-            if children.isEmpty {
+            if preparing { ProgressView("Dateiliste wird vorbereitet …") }
+            if !preparing, visibleChildren.isEmpty {
                 ContentUnavailableView(query.isEmpty ? "Ordner ist leer" : "Keine Treffer", systemImage: query.isEmpty ? "folder" : "magnifyingglass")
             }
-            ForEach(children) { child in
+            ForEach(visibleChildren) { child in
                 VStack(spacing: 12) {
                     Button {
                         withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.42, dampingFraction: 0.8)) { selected = child }
@@ -88,6 +96,19 @@ struct FolderContents: View {
                 }
             }
         }.cosmicCard()
+        .task(id: "\(node.id)-\(node.aggregateSize)-\(node.fileCount)-\(node.directoryCount)-\(node.children.count)-\(query)") {
+            preparing = true
+            let snapshot = node.children
+            let search = query
+            let worker = Task.detached(priority: .userInitiated) {
+                snapshot.filter { search.isEmpty || $0.name.localizedStandardContains(search) }
+                    .sorted { $0.aggregateSize > $1.aggregateSize }
+            }
+            let children = await worker.value
+            guard !Task.isCancelled else { return }
+            visibleChildren = children
+            preparing = false
+        }
     }
 }
 

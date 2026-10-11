@@ -5,11 +5,13 @@ import Observation
 final class ScanResult {
     private(set) var root: FileNode
     let isAppContainer: Bool
+    let unreadableEntries: Int
     private let accessLease: FolderAccessLease?
     var isDeleting = false
     var errorMessage: String?
 
-    init(root: FileNode, isAppContainer: Bool, accessLease: FolderAccessLease? = nil) {
+    init(root: FileNode, isAppContainer: Bool, accessLease: FolderAccessLease? = nil, unreadableEntries: Int = 0) {
+        self.unreadableEntries = unreadableEntries
         self.root = root
         self.isAppContainer = isAppContainer
         self.accessLease = accessLease

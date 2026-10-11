@@ -7,17 +7,17 @@ enum ScanEvent: Sendable {
 }
 
 actor ScanEngine {
-    var maxParallelDirectories = 4
-
-    func scan(_ rootURL: URL) -> AsyncStream<ScanEvent> {
-        AsyncStream { continuation in
-            let task = Task {
-                let start = Date()
+    func scan(_ rootURL: URL, accessLease: FolderAccessLease? = nil) -> AsyncStream<ScanEvent> {
+        // File-provider calls can block. Keep all traversal off the main actor,
+        // with one worker rather than recursively spawning tasks per directory.
+        AsyncStream(bufferingPolicy: .bufferingNewest(2)) { continuation in
+            let task = Task.detached(priority: .userInitiated) {
+                defer { withExtendedLifetime(accessLease) {} }
+                var worker = ScanWorker(continuation: continuation)
                 do {
-                    let counter = ScanCounter(start: start, continuation: continuation)
-                    let root = try await self.traverse(rootURL, counter: counter)
+                    let root = try worker.traverse(rootURL, isRoot: true)
                     try Task.checkCancellation()
-                    await counter.publish()
+                    worker.publish(force: true)
                     continuation.yield(.finished(root))
                 } catch is CancellationError {
                 } catch {
@@ -28,130 +28,76 @@ actor ScanEngine {
             continuation.onTermination = { _ in task.cancel() }
         }
     }
-
-    private func traverse(
-        _ directoryURL: URL,
-        counter: ScanCounter
-    ) async throws -> FileNode {
-        if Task.isCancelled { throw CancellationError() }
-
-        let keys: Set<URLResourceKey> = [
-            .isDirectoryKey,
-            .isSymbolicLinkKey,
-            .fileSizeKey,
-            .totalFileAllocatedSizeKey
-        ]
-        let entries = try FileManager.default.contentsOfDirectory(
-            at: directoryURL,
-            includingPropertiesForKeys: Array(keys),
-            options: []
-        )
-
-        let ownSizeValues = try? directoryURL.resourceValues(forKeys: [.totalFileAllocatedSizeKey])
-        let ownSize = Int64(ownSizeValues?.totalFileAllocatedSize ?? 0)
-
-        var fileChildren: [FileNode] = []
-        var subdirectories: [URL] = []
-        var bytes = ownSize
-        var fileCount = 0
-
-        for entry in entries {
-            try Task.checkCancellation()
-            guard let values = try? entry.resourceValues(forKeys: keys) else { continue }
-            if values.isDirectory == true, values.isSymbolicLink != true {
-                subdirectories.append(entry)
-            } else {
-                let size = Int64(values.totalFileAllocatedSize ?? values.fileSize ?? 0)
-                bytes += size
-                fileCount += 1
-                fileChildren.append(FileNode(
-                    name: entry.lastPathComponent,
-                    url: entry,
-                    isDirectory: false,
-                    size: size,
-                    aggregateSize: size,
-                    fileCount: 1,
-                    directoryCount: 0,
-                    children: []
-                ))
-            }
-        }
-
-        await counter.add(files: fileCount, bytes: bytes)
-        var children = fileChildren
-        var aggregateBytes = bytes
-        var aggregateFiles = fileCount
-        var aggregateDirectories = 1
-
-        for batch in batches(subdirectories, size: maxParallelDirectories) {
-            if Task.isCancelled { throw CancellationError() }
-            let results = try await withThrowingTaskGroup(of: FileNode.self) { group in
-                for subdirectory in batch {
-                    group.addTask {
-                        try await self.traverse(subdirectory, counter: counter)
-                    }
-                }
-                var collected: [FileNode] = []
-                for try await node in group {
-                    collected.append(node)
-                }
-                return collected
-            }
-            for node in results {
-                children.append(node)
-                aggregateBytes += node.aggregateSize
-                aggregateFiles += node.fileCount
-                aggregateDirectories += node.directoryCount
-            }
-
-        }
-
-        let name = directoryURL.lastPathComponent.isEmpty ? "/" : directoryURL.lastPathComponent
-        return FileNode(
-            name: name,
-            url: directoryURL,
-            isDirectory: true,
-            size: ownSize,
-            aggregateSize: aggregateBytes,
-            fileCount: aggregateFiles,
-            directoryCount: aggregateDirectories,
-            children: children
-        )
-    }
 }
 
-func batches<T>(_ array: [T], size: Int) -> [[T]] {
-    guard size > 0 else { return array.isEmpty ? [] : [array] }
-    var result: [[T]] = []
-    var index = 0
-    while index < array.count {
-        let end = min(index + size, array.count)
-        result.append(Array(array[index..<end]))
-        index = end
-    }
-    return result
-}
-
-
-private actor ScanCounter {
+private struct ScanWorker {
+    let continuation: AsyncStream<ScanEvent>.Continuation
     private var progress = ScanProgress()
-    private let start: Date
-    private let continuation: AsyncStream<ScanEvent>.Continuation
+    private let start = Date()
     private var lastPublished = Date.distantPast
+    private let keys: Set<URLResourceKey> = [.isDirectoryKey, .isSymbolicLinkKey, .fileSizeKey, .totalFileAllocatedSizeKey]
 
-    init(start: Date, continuation: AsyncStream<ScanEvent>.Continuation) {
-        self.start = start
+    init(continuation: AsyncStream<ScanEvent>.Continuation) {
         self.continuation = continuation
     }
-    func add(files: Int, bytes: Int64) {
-        progress.filesScanned += files
+
+    mutating func traverse(_ directory: URL, isRoot: Bool = false) throws -> FileNode {
+        try Task.checkCancellation()
+        progress.currentPath = directory.lastPathComponent
+        publish()
+        let entries: [URL]
+        do {
+            entries = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: Array(keys), options: [])
+        } catch {
+            if isRoot { throw error }
+            progress.unreadableEntries += 1
+            publish()
+            return FileNode(name: directory.lastPathComponent, url: directory, isDirectory: true, size: 0, aggregateSize: 0, fileCount: 0, directoryCount: 1)
+        }
         progress.directoriesScanned += 1
-        progress.bytesScanned += bytes
-        if Date().timeIntervalSince(lastPublished) >= 0.1 { publish() }
+        let ownSize = Int64((try? directory.resourceValues(forKeys: [.totalFileAllocatedSizeKey]))?.totalFileAllocatedSize ?? 0)
+        progress.bytesScanned += ownSize
+        var children: [FileNode] = []
+        children.reserveCapacity(entries.count)
+        var bytes = ownSize
+        var files = 0
+        var directories = 1
+        for entry in entries {
+            try Task.checkCancellation()
+            progress.currentPath = entry.lastPathComponent
+            do {
+                let values = try entry.resourceValues(forKeys: keys)
+                if values.isDirectory == true, values.isSymbolicLink != true {
+                    let child = try traverse(entry)
+                    children.append(child)
+                    bytes += child.aggregateSize
+                    files += child.fileCount
+                    directories += child.directoryCount
+                } else {
+                    // A cloud placeholder can have zero allocated bytes but a
+                    // meaningful logical size. Do not make it disappear.
+                    let allocated = values.totalFileAllocatedSize ?? 0
+                    let size = Int64(allocated > 0 ? allocated : values.fileSize ?? 0)
+                    children.append(FileNode(name: entry.lastPathComponent, url: entry, isDirectory: false, size: size, aggregateSize: size, fileCount: 1, directoryCount: 0))
+                    bytes += size
+                    files += 1
+                    progress.filesScanned += 1
+                    progress.bytesScanned += size
+                }
+            } catch is CancellationError { throw CancellationError() }
+            catch { progress.unreadableEntries += 1 }
+            publish()
+        }
+        // Sort once on the worker, rather than on every UI update.
+        children.sort { $0.aggregateSize > $1.aggregateSize }
+        return FileNode(name: directory.lastPathComponent.isEmpty ? "/" : directory.lastPathComponent, url: directory, isDirectory: true, size: ownSize, aggregateSize: bytes, fileCount: files, directoryCount: directories, children: children)
     }
-    func publish() {
-        lastPublished = Date()
-        progress.elapsed = lastPublished.timeIntervalSince(start)
+
+    mutating func publish(force: Bool = false) {
+        let now = Date()
+        guard force || now.timeIntervalSince(lastPublished) >= 0.15 else { return }
+        lastPublished = now
+        progress.elapsed = now.timeIntervalSince(start)
         continuation.yield(.progress(progress))
     }
 }

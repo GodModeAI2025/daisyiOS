@@ -1,8 +1,8 @@
 OrbitDisk is a native SwiftUI storage analyzer for iPhone and iPad, requiring iOS 27. No account or sign-in is required.
 
-To test: open the Analyze tab (German navigation title: Entdecken), choose Eigene App-Daten to scan the app container, then open the App-Container result. Tap a sunburst segment to show actions. Alternatively choose Ordner oder Datenträger wählen and grant a folder through Apple's document picker.
+To test: on launch choose Ordner oder Datenträger wählen and grant a folder through Apple's document picker. During scanning, progress counts, elapsed time and cancellation are available. Results open automatically. Tap a sunburst segment or a list entry for file actions. Small diagram segments are neutral; the file list retains every readable entry. There is no hard file-count limit. Unreadable entries are reported as an incomplete analysis.
 
-The app analyzes only its own data or directories expressly selected via the system picker. It does not scan other apps' private data or the entire device. In Dateien anzeigen presents the native document picker with a directory hint; providers may ignore the hint. Quick Look appears only for supported files. Deletion requires an explicit confirmation, is scoped to the analyzed directory, and protects the analysis root and internal app settings.
+The app analyzes only directories expressly selected via the system picker. It does not scan other apps' private data or the entire device. In Dateien anzeigen presents the native document picker with a directory hint; providers may ignore the hint. Quick Look appears only for supported files. Deletion requires an explicit confirmation, is scoped to the analyzed directory, and protects the analysis root and internal app settings.
 
 External USB storage is optional, not required. The user can test with local files. The interface follows system light/dark appearance and Reduce Motion.
 
