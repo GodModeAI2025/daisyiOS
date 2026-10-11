@@ -30,7 +30,7 @@ Scheme: `daisyiOS`. Mindestversion: `27.0`, Gerätefamilien: iPhone und iPad.
 
 Am 11. Oktober 2026 mit Xcode 27 über Xcode-MCP gebaut. 17 Tests bestehen: Größenaggregation, 5.000 Dateien ohne Verlust, Fortschritt, Abbruch, Diagramm mit 10.000 Einträgen ohne 10.000 SwiftUI-Segmente sowie Lösch- und Pfadschutz. Die Testzahlen sind keine Dateigrenzen.
 
-Version 1.0 (2) steht in TestFlight für die interne Gruppe „Mark – Intern“ auf „Im Test“. Build 3 enthält den direkten Einstieg ohne Tab-Leiste und App-Container-Auswahl sowie den überarbeiteten Scan. Der Status des nächsten Uploads und der Simulatorprüfung wird in `release/status.json` lokal festgehalten. Eine Simulatorprüfung ersetzt keine Prüfung mit realen Cloud-/USB-Dateianbietern. App-Review ist wegen offener Pflichtangaben noch nicht eingereicht; Veröffentlichung bleibt manuell.
+Version 1.0 (3) steht in TestFlight für die interne Gruppe „Mark – Intern“ auf „Im Test“. Build 3 enthält den direkten Einstieg ohne Tab-Leiste und App-Container-Auswahl sowie den überarbeiteten Scan. Die Upload- und Simulatornachweise werden in `release/status.json` lokal festgehalten. Eine Simulatorprüfung ersetzt keine Prüfung mit realen Cloud-/USB-Dateianbietern. App-Review ist wegen offener Pflichtangaben noch nicht eingereicht; Veröffentlichung bleibt manuell.
 
 ## Weiterentwicklung
 

@@ -1,4 +1,4 @@
-# Release 1.0 (1)
+# OrbitDisk 1.0 (3)
 
 Bundle-ID: `com.godmodeai.daisyiOS`  
 App Store Connect App-ID: `6821645213`  
@@ -6,20 +6,17 @@ Team: `SP73Z8JWXM` (Mobile Box)
 
 ## Bestätigter Stand
 
-- Release-Archiv erstellt; Mindestversion iOS 27.0, Gerätefamilien iPhone und iPad.
-- IPA mit Apple-Distribution-Signatur und App-Store-Provisionierung exportiert.
-- Upload am 11. Oktober 2026 um 17:19 Uhr (Europe/Berlin) erfolgreich; Apple meldet Verarbeitung.
-- Deutsche ASO-Metadaten unter `app-store/de-DE/`; Zeichenlimits geprüft.
-- Screenshot-Reihenfolge: Speicher entdecken, Dateien verwalten, Ordner auswählen.
+- Version 1.0 (3), sichtbarer Name OrbitDisk; iOS 27.0, iPhone und iPad.
+- Xcode-Archiv und Apple-Distribution-IPA erstellt; Upload am 11. Oktober 2026 um 19:22 Uhr (Europe/Berlin) erfolgreich.
+- Export-Compliance mit bestätigter Antwort „Keinen der oben genannten Algorithmen“ gespeichert.
+- Build 3 in der internen Gruppe „Mark – Intern“ auf „Im Test“; Testeraccount `mark_zimmermann@mac.com`. Die Gruppe enthält außerdem Build 2, automatische Buildverteilung bleibt aus.
+- Neuer direkter Einstieg ohne Tabs und App-Container-Auswahl, abbrechbare Ladeanzeige, Hintergrundscan und aufbereitete Dateiliste. Keine feste Dateigrenze.
+- 17 Unit-Tests bestanden; neue Simulator-Einstiegsaufnahme unter `../screenshots/feedback-entry-ipad-ios27.png`.
+- Store-Name, Untertitel, Kategorie und sechs Screenshots im Portal gespeichert. Die lokalen Texte wurden für den neuen Einstieg aktualisiert und müssen vor der App-Review-Einreichung erneut übertragen werden.
 - Signierte lokale Pakete unter `artifacts/` sind nicht im Git-Repository.
 
-## Noch zu verifizieren
+## App-Review noch offen
 
-1. Safari-Anmeldung bei App Store Connect abschließen (Touch ID / 2FA).
-2. Verarbeiteten Build prüfen, Export-Compliance beantworten und eine interne TestFlight-Gruppe für den Eigentümer zuordnen.
-3. Vorbereitete Store-Metadaten und native iPhone-/iPad-Screenshots übertragen; Kategorie Dienstprogramme und manuelle Veröffentlichung einstellen.
-4. Datenschutzangaben und Datenschutz-URL werden vom Eigentümer separat gepflegt.
-5. Erforderliche Review-Kontaktdaten und sonstige Pflichtfelder prüfen, Build auswählen und zur Prüfung einreichen.
-6. Endzustand als TestFlight-Testbereitschaft und „Warten auf Prüfung“ getrennt zurücklesen.
+Apple nennt Inhaltsrechte, Altersfreigabe, Preisstufe sowie Datenschutz-URL und Datenschutzpraktiken als Pflichtangaben. Datenschutz wird vom Eigentümer separat gepflegt; der Preis ist noch nicht festgelegt. Die Inhaltsrechte-Erklärung ist als ungespeicherter Entwurf erhalten, konkrete Zustimmung zum Speichern steht aus. Der Review-Build muss von Build 2 auf Build 3 aktualisiert werden; Veröffentlichung bleibt manuell.
 
-Der lokale, nicht eingecheckte `status.json` enthält die aktuellen Evidenzpfade. Der Upload allein beweist weder TestFlight-Testbereitschaft noch eine erfolgte Review-Einreichung.
+TestFlight-Freigabe ist bestätigt. Die App wurde noch nicht zur App-Review eingereicht. Der lokale, nicht eingecheckte `status.json` enthält die aktuellen Evidenzpfade.
