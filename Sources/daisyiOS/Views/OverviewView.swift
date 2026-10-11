@@ -28,7 +28,8 @@ struct OverviewView: View {
                     Button("Erneut versuchen", action: load)
                 } else { ProgressView("Speicher wird gelesen …") }
             }
-            .navigationTitle("Speicher")
+            .cosmicScreen()
+            .navigationTitle("Dein Speicher")
             .toolbar { Button("Aktualisieren", systemImage: "arrow.clockwise", action: load) }
             .refreshable { load() }
             .task { load() }
@@ -44,7 +45,7 @@ struct StorageSummary: View {
     let volume: VolumeInfo
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Label("Gerätespeicher", systemImage: "internaldrive.fill")
+            Label("RAUM FÜR DEINE WELT", systemImage: "sparkles")
                 .font(.headline).foregroundStyle(.secondary)
             Text(volume.usedCapacity.formattedBytes)
                 .font(.largeTitle.bold()).fontDesign(.rounded)
@@ -56,7 +57,7 @@ struct StorageSummary: View {
                 Spacer()
                 Text("\(volume.availableCapacity.formattedBytes) frei")
             }.font(.subheadline)
-        }.padding(.vertical, 12)
+        }.cosmicCard().padding(.vertical, 8)
     }
 }
 struct StorageBarView: View {

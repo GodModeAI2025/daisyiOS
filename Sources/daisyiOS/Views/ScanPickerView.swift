@@ -6,7 +6,8 @@ import Observation
 @Observable
 final class ScanModel {
     var progress: ScanProgress?
-    var root: FileNode?
+    var result: ScanResult?
+    var root: FileNode? { result?.root }
     var errorMessage: String?
     var isScanning = false
     var scannedFolderName: String?
@@ -48,7 +49,7 @@ final class ScanModel {
         cancelled = false
         isScanning = true
         progress = ScanProgress()
-        root = nil
+        result = nil
         errorMessage = nil
         scannedFolderName = folderName
 
@@ -60,7 +61,7 @@ final class ScanModel {
                 case .progress(let progress):
                     self.progress = progress
                 case .finished(let node):
-                    self.root = node
+                    self.result = ScanResult(root: node, isAppContainer: url.standardizedFileURL == URL(fileURLWithPath: NSHomeDirectory()).standardizedFileURL, accessLease: self.accessLease)
                     if let accessURL = self.accessURL {
                         do {
                             try await AccessStore.shared.add(name: folderName, url: accessURL)
@@ -88,7 +89,14 @@ struct ScanPickerView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Scannen") {
+                Section {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label("DEIN DIGITALER KOSMOS", systemImage: "sparkles").font(.caption.weight(.semibold)).foregroundStyle(.indigo)
+                        Text("Finde, was Raum braucht.").font(.title.bold()).fontDesign(.rounded)
+                        Text("Ein Ordner. Ein Laufwerk. Eine neue Perspektive auf deine Daten.").foregroundStyle(.secondary)
+                    }.padding(.vertical, 12).listRowBackground(Color.clear)
+                }
+                Section("Analyse starten") {
                     Button {
                         model.scanAppContainer()
                     } label: {
@@ -99,7 +107,7 @@ struct ScanPickerView: View {
                     Button {
                         showFolderPicker = true
                     } label: {
-                        Label("Ordner wählen…", systemImage: "folder.badge.plus")
+                        Label("Ordner oder Datenträger wählen", systemImage: "externaldrive.badge.plus")
                     }
                     .disabled(model.isScanning)
                 }
@@ -127,10 +135,11 @@ struct ScanPickerView: View {
                 if model.cancelled, !model.isScanning {
                     Section { Label("Scan abgebrochen", systemImage: "stop.circle") }
                 }
-                if let root = model.root {
+                if let result = model.result {
+                    let root = result.root
                     Section("Ergebnis") {
                         NavigationLink {
-                            FolderDetailView(node: root, title: model.scannedFolderName)
+                            FolderDetailView(node: root, title: model.scannedFolderName, result: result)
                         } label: {
                             Label {
                                 VStack(alignment: .leading) {
@@ -157,39 +166,57 @@ struct ScanPickerView: View {
                 }
 
             }
-            .navigationTitle("Analysieren")
+            .cosmicScreen()
+            .navigationTitle("Entdecken")
             .task { await model.loadFolders() }
-            .fileImporter(
-                isPresented: $showFolderPicker,
-                allowedContentTypes: [.folder],
-                allowsMultipleSelection: false
-            ) { result in
-                switch result {
-                case .success(let urls): if let url = urls.first { model.scanFolder(url) }
-                case .failure(let error): model.errorMessage = error.localizedDescription
-                }
+            .sheet(isPresented: $showFolderPicker) {
+                LocationBrowser(onSelect: { url in model.scanFolder(url) })
             }
         }
     }
 }
 
 struct FileRow: View {
-    let node: FileNode
-
+    let name: String
+    let isDirectory: Bool
+    let fileCount: Int
+    let bytes: Int64
+    @Environment(\.dynamicTypeSize) private var typeSize
+    init(node: FileNode) {
+        name = node.name
+        isDirectory = node.isDirectory
+        fileCount = node.fileCount
+        bytes = node.aggregateSize
+    }
     var body: some View {
-        HStack {
-            Image(systemName: node.isDirectory ? "folder" : "doc")
-                .foregroundStyle(node.isDirectory ? .blue : .secondary)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(node.name)
-                Text("\(node.fileCount) Dateien")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        if typeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 8) {
+                FileRowLabel(name: name, isDirectory: isDirectory, fileCount: fileCount)
+                Text(bytes.formattedBytes).font(.callout).foregroundStyle(.secondary)
+            }.frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            HStack {
+                FileRowLabel(name: name, isDirectory: isDirectory, fileCount: fileCount)
+                Spacer()
+                Text(bytes.formattedBytes).font(.callout).foregroundStyle(.secondary)
             }
-            Spacer()
-            Text(node.aggregateSize.formattedBytes)
-                .font(.callout)
-                .foregroundStyle(.secondary)
+        }
+    }
+}
+struct FileRowLabel: View {
+    let name: String
+    let isDirectory: Bool
+    let fileCount: Int
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                Text(isDirectory ? "\(fileCount) Dateien" : "Datei")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: isDirectory ? "folder" : "doc")
+                .foregroundStyle(isDirectory ? .indigo : .secondary)
         }
     }
 }
