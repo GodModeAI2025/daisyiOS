@@ -1,49 +1,44 @@
 # daisyiOS
 
-Storage analyzer for iOS 27 — an iOS companion to [OpenDisk](https://github.com/137137137/OpenDisk), with a sunburst-style drill-down into what's eating your storage.
+Native Speicheranalyse für iPhone und iPad, ausschließlich ab iOS 27.
 
-Work in progress (walking skeleton).
+## Funktionen
 
-## What it does
+- Gerätespeicher: Gesamtgröße, Belegung, aktuell freier Speicher und die vom System geschätzte verfügbare Kapazität für wichtige Daten.
+- Analyse der eigenen App-Daten oder eines über Dateien freigegebenen Ordners (Gerät, iCloud Drive, externe Laufwerke und unterstützte Dateianbieter).
+- Sunburst mit drei Ebenen und Auswahl des angetippten Bereichs; Ordnernavigation, Suche und nach Größe sortierte Einträge.
+- Dateivorschau mit Quick Look; zuletzt analysierte Ordner über lokal gespeicherte Bookmarks erneut öffnen.
+- Abbrechbarer Scan mit monotonen Fortschrittszählern und ohne Verfolgung symbolischer Verzeichnislinks.
+- Native SwiftUI-Navigation und Tab-Leiste, Systemfarben, Dynamic Type, zugängliche textuelle Alternative zum Diagramm und eigenes App-Icon.
 
-- **Übersicht**: total / used / free / purgeable capacity of the device volume (matches the numbers in Settings → General → Storage).
-- **Scannen**: scans the app's own data container or any folder you pick via the Files picker ("On My iPhone", iCloud Drive, USB, network) and shows a sunburst with drill-down.
-
-Because of the iOS sandbox, whole-device scanning is not possible — the app works with the three access sources above.
+Die Analyse überträgt keine Daten. iOS erlaubt keinen vollständigen Scan anderer Apps oder des Geräts. Systemkapazitäten sind Schätzungen und können von der Anzeige in Einstellungen abweichen. Cloud-Dateien können durch den Dateianbieter geladen werden. Ordnerzugriffe können ablaufen; dann erneut auswählen.
 
 ## Build
 
-Requires Xcode 26+ (iOS 27 SDK) and [XcodeGen](https://github.com/yonaskolb/XcodeGen):
+Xcode 27 mit iOS-27-SDK und XcodeGen:
 
-```bash
-brew install xcodegen
+```sh
 xcodegen generate
 open daisyiOS.xcodeproj
 ```
 
-Run the `daisyiOS` scheme on a simulator or device (iOS 27).
+Scheme: `daisyiOS`. Mindestversion: `27.0`, Gerätefamilien: iPhone und iPad.
 
-## Structure
+## Validierung
 
-```
-Sources/daisyiOS/
-├── daisyiOSApp.swift      # App entry
-├── Models/                # FileNode, VolumeInfo, ScanProgress
-├── Services/              # ScanEngine (actor), VolumeStatsService, AccessStore (bookmarks)
-├── Views/                 # RootView, OverviewView, ScanPickerView, SunburstChart
-└── Utilities/             # Formatters
-Sources/daisyiOSTests/     # Unit tests (scan engine, volume stats)
-```
+Am 11. Oktober 2026 mit Xcode 27.0 über Xcode-MCP gebaut und im iOS-27-Simulator gestartet. Sieben Unit-Tests bestehen, einschließlich Größenaggregation, leerer und fehlender Ordner, monotoner Fortschritt bei tiefen Verzeichnisstrukturen und Diagrammanteile. Der Fortschritts-Regressionsfall wurde vor der Korrektur rot und danach grün ausgeführt.
 
-## Roadmap
+Die Speicherübersicht wurde im Simulator per Screenshot visuell geprüft. Die Xcode-MCP-Geräteinteraktion meldete widersprüchlich „Session not found“ und ein belegtes Gerät; eine vollständige automatisierte Bedienprüfung ist deshalb noch offen.
 
-- [x] Phase 0 — walking skeleton (this state)
-- [ ] Phase 1 — storage overview polish
-- [ ] Phase 2 — incremental rescans (mtime + entry-hash cache in SwiftData), parallel tuning
-- [ ] Phase 3 — full sunburst port from OpenDisk (hit-testing, zoom, breadcrumb)
-- [ ] Phase 4 — photo library analysis + Collector deletion
-- [ ] Phase 5 — Liquid Glass polish, localization (DE/EN), App Store prep
+Die Simulatorprüfung ersetzt keine Prüfung mit realen Cloud-/USB-Dateianbietern und keinem physischen Gerät. Signierung, TestFlight und App-Store-Veröffentlichung sind noch offen.
 
-## License
+## Weiterentwicklung
 
-TBD
+- Inkrementelle Rescans und Cache
+- Fotoanalyse und sichere Löschfunktionen
+- Englische Übersetzung und vollständige Accessibility-Prüfung
+- Geräteprüfung und App-Store-Vorbereitung
+
+## Lizenz
+
+Noch nicht festgelegt.

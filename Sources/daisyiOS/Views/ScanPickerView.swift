@@ -10,28 +10,42 @@ final class ScanModel {
     var errorMessage: String?
     var isScanning = false
     var scannedFolderName: String?
+    var savedFolders: [AccessStore.Folder] = []
+    var cancelled = false
+
+    func loadFolders() async { savedFolders = await AccessStore.shared.folders }
+
+    func reopen(_ folder: AccessStore.Folder) async {
+        do { scanFolder(try await AccessStore.shared.url(for: folder)) }
+        catch { errorMessage = "Ordner nicht mehr verfügbar. Bitte erneut auswählen. " + error.localizedDescription }
+    }
 
     private var scanTask: Task<Void, Never>?
     private var accessURL: URL?
+    private var accessLease: FolderAccessLease?
 
     func scanAppContainer() {
         guard !isScanning else { return }
-        let container = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        accessLease = nil
+        accessURL = nil
+        let container = URL(fileURLWithPath: NSHomeDirectory())
         startScan(of: container, folderName: "App-Container")
     }
 
     func scanFolder(_ url: URL) {
         guard !isScanning else { return }
-        let _ = url.startAccessingSecurityScopedResource()
+        accessLease = FolderAccessLease(url: url)
         accessURL = url
         startScan(of: url, folderName: url.lastPathComponent)
     }
 
     func cancel() {
+        cancelled = true
         scanTask?.cancel()
     }
 
     private func startScan(of url: URL, folderName: String) {
+        cancelled = false
         isScanning = true
         progress = ScanProgress()
         root = nil
@@ -47,6 +61,12 @@ final class ScanModel {
                     self.progress = progress
                 case .finished(let node):
                     self.root = node
+                    if let accessURL = self.accessURL {
+                        do {
+                            try await AccessStore.shared.add(name: folderName, url: accessURL)
+                            await self.loadFolders()
+                        } catch { self.errorMessage = "Der Ordnerzugriff konnte nicht gespeichert werden: " + error.localizedDescription }
+                    }
                 case .failed(let error):
                     self.errorMessage = error.localizedDescription
                 }
@@ -56,8 +76,6 @@ final class ScanModel {
     }
 
     private func finishScan() {
-        accessURL?.stopAccessingSecurityScopedResource()
-        accessURL = nil
         scanTask = nil
         isScanning = false
     }
@@ -88,6 +106,7 @@ struct ScanPickerView: View {
 
                 if model.isScanning, let progress = model.progress {
                     Section("Fortschritt") {
+                        ProgressView("Ordner wird analysiert …")
                         LabeledContent("Dateien", value: "\(progress.filesScanned)")
                         LabeledContent("Ordner", value: "\(progress.directoriesScanned)")
                         LabeledContent("Gelesen", value: progress.bytesScanned.formattedBytes)
@@ -105,24 +124,49 @@ struct ScanPickerView: View {
                     }
                 }
 
+                if model.cancelled, !model.isScanning {
+                    Section { Label("Scan abgebrochen", systemImage: "stop.circle") }
+                }
                 if let root = model.root {
-                    Section("Ergebnis (\(model.scannedFolderName ?? root.name))") {
-                        SunburstChart(root: root)
-                            .frame(height: 260)
-                        ForEach(root.children) { child in
-                            FileRow(node: child)
+                    Section("Ergebnis") {
+                        NavigationLink {
+                            FolderDetailView(node: root)
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading) {
+                                    Text(model.scannedFolderName ?? root.name).font(.headline)
+                                    Text("\(root.aggregateSize.formattedBytes) · \(root.fileCount) Dateien").foregroundStyle(.secondary)
+                                }
+                            } icon: { Image(systemName: "chart.pie.fill").foregroundStyle(.indigo) }
                         }
                     }
                 }
+                if !model.savedFolders.isEmpty {
+                    Section("Zuletzt analysiert") {
+                        ForEach(model.savedFolders) { folder in
+                            Button { Task { await model.reopen(folder) } } label: {
+                                Label(folder.name, systemImage: "folder")
+                            }.disabled(model.isScanning)
+                        }
+                    }
+                }
+                Section {
+                    Label("Lokal und privat", systemImage: "lock.shield")
+                    Text("Wähle einen Ordner auf deinem Gerät, in iCloud Drive oder auf einem verbundenen Laufwerk. Bei Cloud-Dateien kann das Laden Zeit benötigen.")
+                        .foregroundStyle(.secondary)
+                }
+
             }
-            .navigationTitle("Scannen")
+            .navigationTitle("Analysieren")
+            .task { await model.loadFolders() }
             .fileImporter(
                 isPresented: $showFolderPicker,
                 allowedContentTypes: [.folder],
                 allowsMultipleSelection: false
             ) { result in
-                if case let .success(urls) = result, let url = urls.first {
-                    model.scanFolder(url)
+                switch result {
+                case .success(let urls): if let url = urls.first { model.scanFolder(url) }
+                case .failure(let error): model.errorMessage = error.localizedDescription
                 }
             }
         }
@@ -148,4 +192,11 @@ struct FileRow: View {
                 .foregroundStyle(.secondary)
         }
     }
+}
+
+final class FolderAccessLease {
+    let url: URL
+    let acquired: Bool
+    init(url: URL) { self.url = url; acquired = url.startAccessingSecurityScopedResource() }
+    deinit { if acquired { url.stopAccessingSecurityScopedResource() } }
 }

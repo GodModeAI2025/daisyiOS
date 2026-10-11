@@ -26,7 +26,11 @@ actor AccessStore {
 
     func add(name: String, url: URL) throws {
         let bookmark = try url.bookmarkData()
-        folders.removeAll { $0.name == name }
+        folders.removeAll { folder in
+            var stale = false
+            let savedURL = try? URL(resolvingBookmarkData: folder.bookmark, relativeTo: nil, bookmarkDataIsStale: &stale)
+            return savedURL?.standardizedFileURL == url.standardizedFileURL
+        }
         folders.append(Folder(name: name, bookmark: bookmark))
         persist()
     }

@@ -14,7 +14,10 @@ actor ScanEngine {
             let task = Task {
                 let start = Date()
                 do {
-                    let root = try await self.traverse(rootURL, continuation: continuation, start: start)
+                    let counter = ScanCounter(start: start, continuation: continuation)
+                    let root = try await self.traverse(rootURL, counter: counter)
+                    try Task.checkCancellation()
+                    await counter.publish()
                     continuation.yield(.finished(root))
                 } catch is CancellationError {
                 } catch {
@@ -28,8 +31,7 @@ actor ScanEngine {
 
     private func traverse(
         _ directoryURL: URL,
-        continuation: AsyncStream<ScanEvent>.Continuation,
-        start: Date
+        counter: ScanCounter
     ) async throws -> FileNode {
         if Task.isCancelled { throw CancellationError() }
 
@@ -54,6 +56,7 @@ actor ScanEngine {
         var fileCount = 0
 
         for entry in entries {
+            try Task.checkCancellation()
             guard let values = try? entry.resourceValues(forKeys: keys) else { continue }
             if values.isDirectory == true, values.isSymbolicLink != true {
                 subdirectories.append(entry)
@@ -74,6 +77,7 @@ actor ScanEngine {
             }
         }
 
+        await counter.add(files: fileCount, bytes: bytes)
         var children = fileChildren
         var aggregateBytes = bytes
         var aggregateFiles = fileCount
@@ -84,7 +88,7 @@ actor ScanEngine {
             let results = try await withThrowingTaskGroup(of: FileNode.self) { group in
                 for subdirectory in batch {
                     group.addTask {
-                        try await self.traverse(subdirectory, continuation: continuation, start: start)
+                        try await self.traverse(subdirectory, counter: counter)
                     }
                 }
                 var collected: [FileNode] = []
@@ -99,12 +103,7 @@ actor ScanEngine {
                 aggregateFiles += node.fileCount
                 aggregateDirectories += node.directoryCount
             }
-            continuation.yield(.progress(ScanProgress(
-                filesScanned: aggregateFiles,
-                directoriesScanned: aggregateDirectories,
-                bytesScanned: aggregateBytes,
-                elapsed: Date().timeIntervalSince(start)
-            )))
+
         }
 
         let name = directoryURL.lastPathComponent.isEmpty ? "/" : directoryURL.lastPathComponent
@@ -131,4 +130,28 @@ func batches<T>(_ array: [T], size: Int) -> [[T]] {
         index = end
     }
     return result
+}
+
+
+private actor ScanCounter {
+    private var progress = ScanProgress()
+    private let start: Date
+    private let continuation: AsyncStream<ScanEvent>.Continuation
+    private var lastPublished = Date.distantPast
+
+    init(start: Date, continuation: AsyncStream<ScanEvent>.Continuation) {
+        self.start = start
+        self.continuation = continuation
+    }
+    func add(files: Int, bytes: Int64) {
+        progress.filesScanned += files
+        progress.directoriesScanned += 1
+        progress.bytesScanned += bytes
+        if Date().timeIntervalSince(lastPublished) >= 0.1 { publish() }
+    }
+    func publish() {
+        lastPublished = Date()
+        progress.elapsed = lastPublished.timeIntervalSince(start)
+        continuation.yield(.progress(progress))
+    }
 }

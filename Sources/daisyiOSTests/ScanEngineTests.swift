@@ -49,6 +49,23 @@ final class ScanEngineTests: XCTestCase {
         XCTAssertGreaterThan(progressEvents, 0)
     }
 
+    func testProgressNeverMovesBackwards() async throws {
+        for index in 0..<10 {
+            let directory = tempDir.appending(path: "folder-\(index)/nested/deep")
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try Data(count: 1024).write(to: directory.appending(path: "data"))
+        }
+        var previous = ScanProgress()
+        for await event in await ScanEngine().scan(tempDir) {
+            if case .progress(let current) = event {
+                XCTAssertGreaterThanOrEqual(current.filesScanned, previous.filesScanned)
+                XCTAssertGreaterThanOrEqual(current.directoriesScanned, previous.directoriesScanned)
+                XCTAssertGreaterThanOrEqual(current.bytesScanned, previous.bytesScanned)
+                previous = current
+            }
+        }
+    }
+
     func testScanEmptyDirectory() async throws {
         let empty = tempDir.appending(path: "empty")
         try FileManager.default.createDirectory(at: empty, withIntermediateDirectories: true)
