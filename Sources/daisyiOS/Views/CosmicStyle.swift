@@ -46,14 +46,15 @@ struct OrbitOptionLabel: View {
     let value: String
     let symbol: String
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: symbol).foregroundStyle(.indigo)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.caption).foregroundStyle(.secondary)
-                Text(value).font(.body.weight(.medium)).foregroundStyle(.primary)
-            }
-            Spacer(minLength: 8)
-            Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: symbol).foregroundStyle(.indigo)
+                Text(title).foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up.chevron.down").foregroundStyle(.secondary)
+            }.font(.caption)
+            Text(value).font(.body.weight(.medium)).foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }.padding(14)
             .background(Color(uiColor: .tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
             .contentShape(Rectangle())

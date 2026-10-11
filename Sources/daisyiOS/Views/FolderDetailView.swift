@@ -106,9 +106,11 @@ struct FolderContents: View {
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 16) {
             Text("Inhalt").font(.title3.bold())
-            Text("Ordner stehen immer vor Dateien. Tippe einen Ordner, um seinen Inhalt zu sehen.")
+            Text("Ordner stehen immer vor Dateien. Tippe einen Ordner, um eine Ebene tiefer zu analysieren.")
                 .font(.subheadline).foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 10) {
+            (typeSize.isAccessibilitySize
+             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+             : AnyLayout(HStackLayout(alignment: .top, spacing: 10))) {
                 Menu {
                     Picker("Einträge anzeigen", selection: $filter) {
                         ForEach(EntryFilter.allCases) { value in Text(value.rawValue).tag(value) }
@@ -135,41 +137,28 @@ struct FolderContents: View {
                 ContentUnavailableView(query.isEmpty && filter == .all ? "Ordner ist leer" : "Keine passenden Einträge", systemImage: "magnifyingglass", description: Text("Passe Filter oder Suche an."))
             }
             ForEach(visibleChildren) { child in
-                HStack(alignment: .top, spacing: 10) {
-                    if selecting { SelectionCheckbox(node: child, selection: batch) }
                 VStack(spacing: 8) {
-                    (typeSize.isAccessibilitySize
-                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
-                     : AnyLayout(HStackLayout(spacing: 8))) {
-                    if child.isDirectory {
-                        NavigationLink { FolderDetailView(node: child, result: result) } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    FileRow(node: child)
-                                    Label("Unterordner öffnen", systemImage: "chevron.right").font(.caption)
-                                }
-                                Spacer(minLength: 8)
-                                Image(systemName: "chevron.right")
-                            }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
-                        }.buttonStyle(.plain).frame(minHeight: 44)
-                            .accessibilityHint("Öffnet den Ordner in OrbitDisk")
-                    } else {
-                        Button { select(child) } label: { FileRow(node: child).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }
-                            .buttonStyle(.plain).frame(minHeight: 44)
-                            .accessibilityHint("Zeigt Vorschau und Dateiaktionen")
-                    }
-                    if child.isDirectory {
-                        Button { select(child) } label: {
-                            Text("Details").font(.subheadline)
-                                .padding(.horizontal, 8).frame(minHeight: 44)
-                                .contentShape(Rectangle())
-                        }.buttonStyle(.plain).foregroundStyle(.tint)
-                            .accessibilityLabel("Details zu \(child.name)")
-                            .accessibilityHint("Zeigt Größe, Speicherort und verfügbare Aktionen")
-                    }
+                    HStack(alignment: .top, spacing: 10) {
+                        if selecting { SelectionCheckbox(node: child, selection: batch) }
+                        if child.isDirectory {
+                            NavigationLink { FolderDetailView(node: child, result: result) } label: {
+                                VStack(alignment: .trailing, spacing: 8) {
+                                    FileRow(node: child).frame(maxWidth: .infinity, alignment: .leading)
+                                    HStack(spacing: 6) {
+                                        Text("Tiefer analysieren").font(.caption.weight(.medium))
+                                        Image(systemName: "chevron.right").font(.body.weight(.semibold))
+                                    }.foregroundStyle(.tint)
+                                }.frame(maxWidth: .infinity).contentShape(Rectangle())
+                            }.buttonStyle(.plain).frame(minHeight: 44)
+                                .accessibilityHint("Analysiert diesen Ordner und zeigt seine Unterordner und Dateien")
+                        } else {
+                            Button { select(child) } label: {
+                                FileRow(node: child).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+                            }.buttonStyle(.plain).frame(minHeight: 44)
+                                .accessibilityHint("Zeigt Vorschau und Dateiaktionen")
+                        }
                     }
                     Divider()
-                }
                 }
             }
         }.cosmicCard()

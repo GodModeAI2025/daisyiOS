@@ -21,7 +21,7 @@ Ordnersegmente im Orb öffnen direkt ihre Unterordner; die Orb-Mitte führt zur 
 
 „Ordner prüfen“ bietet rekursive Aufräumkandidaten und einen inhaltsbasierten Duplikatfinder mit auswählbarer Kopie zum Behalten und bestätigter Entfernung. Regeln und Prüfverhalten stehen in [docs/cleanup-and-duplicates.md](docs/cleanup-and-duplicates.md).
 
-Build 5 ergänzt Mehrfachauswahl und „Alle Funde auswählen“ in Aufräumkandidaten sowie Auswahl aktueller Such-/Filtertreffer in der Dateiliste. Die bestätigte Auswahl wird gesammelt entfernt; betroffene Dateistruktur und Größen aktualisieren sich im Hintergrund. Aktions- und Optionszeilen ersetzen die uneinheitlichen Pillen-Buttons. Details: [docs/feedback-build5.md](docs/feedback-build5.md). Build 6 ersetzt die wiederholte große Aktionszeile pro Eintrag durch eine kompakte „Details“-Taste; Dateizeilen öffnen Details direkt.
+Build 5 ergänzt Mehrfachauswahl und „Alle Funde auswählen“ in Aufräumkandidaten sowie Auswahl aktueller Such-/Filtertreffer in der Dateiliste. Die bestätigte Auswahl wird gesammelt entfernt; betroffene Dateistruktur und Größen aktualisieren sich im Hintergrund. Aktions- und Optionszeilen ersetzen die uneinheitlichen Pillen-Buttons. Details: [docs/feedback-build5.md](docs/feedback-build5.md). Build 7 stellt Filter und Sortierung nebeneinander und entfernt die Details-Taste. „Tiefer analysieren“ mit Pfeil rechts führt zur nächsten Ordner-Ebene; Dateizeilen öffnen Details direkt.
 
 ## Build
 
