@@ -3,6 +3,7 @@ import QuickLook
 
 struct FolderDetailView: View {
     let node: FileNode
+    var title: String? = nil
     @State private var query = ""
     @State private var previewURL: URL?
     var body: some View {
@@ -21,7 +22,7 @@ struct FolderDetailView: View {
                 }
             }
         }
-        .navigationTitle(node.name)
+        .navigationTitle(title ?? node.name)
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $query, prompt: "Dateien und Ordner suchen")
         .quickLookPreview($previewURL)

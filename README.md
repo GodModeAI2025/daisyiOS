@@ -28,7 +28,7 @@ Scheme: `daisyiOS`. Mindestversion: `27.0`, Gerätefamilien: iPhone und iPad.
 
 Am 11. Oktober 2026 mit Xcode 27.0 über Xcode-MCP gebaut und im iOS-27-Simulator gestartet. Sieben Unit-Tests bestehen, einschließlich Größenaggregation, leerer und fehlender Ordner, monotoner Fortschritt bei tiefen Verzeichnisstrukturen und Diagrammanteile. Der Fortschritts-Regressionsfall wurde vor der Korrektur rot und danach grün ausgeführt.
 
-Die Speicherübersicht wurde im Simulator per Screenshot visuell geprüft. Die Xcode-MCP-Geräteinteraktion meldete widersprüchlich „Session not found“ und ein belegtes Gerät; eine vollständige automatisierte Bedienprüfung ist deshalb noch offen.
+Speicherübersicht, Analyse-Tab, Scan eigener Daten, Ergebnisnavigation und Auswahl eines Sunburst-Bereichs wurden im Simulator geprüft. Die Xcode-MCP-Geräteinteraktion meldete widersprüchlich „Session not found“ und ein belegtes Gerät; die Bedienprüfung erfolgte deshalb über Device Hub und Simulator-Screenshots. Dark Mode, große Schrift und externe Ordner sind noch nicht interaktiv geprüft.
 
 Die Simulatorprüfung ersetzt keine Prüfung mit realen Cloud-/USB-Dateianbietern und keinem physischen Gerät. Signierung, TestFlight und App-Store-Veröffentlichung sind noch offen.
 

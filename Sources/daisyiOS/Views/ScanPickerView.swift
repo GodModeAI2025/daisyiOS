@@ -130,7 +130,7 @@ struct ScanPickerView: View {
                 if let root = model.root {
                     Section("Ergebnis") {
                         NavigationLink {
-                            FolderDetailView(node: root)
+                            FolderDetailView(node: root, title: model.scannedFolderName)
                         } label: {
                             Label {
                                 VStack(alignment: .leading) {
