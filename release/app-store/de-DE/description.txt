@@ -1,5 +1,5 @@
 Sieh, was in deinen Ordnern Platz braucht.
-daisyiOS macht Speicherbedarf sichtbar – mit einem interaktiven Ringdiagramm, klaren Größenangaben und direkten Dateiaktionen.
+OrbitDisk macht Speicherbedarf sichtbar – mit einem interaktiven Ringdiagramm, klaren Größenangaben und direkten Dateiaktionen.
 
 ORDNER ENTDECKEN
 Wähle einen Ordner über die Dateien-Auswahl: auf deinem Gerät, in iCloud Drive oder auf einem verbundenen Datenträger, sofern der Dateianbieter ihn bereitstellt. Erkunde Unterordner und finde große Einträge in der nach Größe sortierten Liste.
@@ -17,7 +17,7 @@ LOKAL ANALYSIEREN
 Die App benötigt kein Benutzerkonto und überträgt keine Analyseergebnisse. Cloud-Dateianbieter können Dateien zum Öffnen oder Analysieren bereitstellen oder laden.
 
 WICHTIG ZU WISSEN
-• iOS schützt die Daten anderer Apps. daisyiOS analysiert eigene App-Daten und ausdrücklich freigegebene Ordner.
+• iOS schützt die Daten anderer Apps. OrbitDisk analysiert eigene App-Daten und ausdrücklich freigegebene Ordner.
 • Ein vollständiger Scan des gesamten iPhone-Dateisystems ist nicht möglich.
 • Systemkapazitäten sind Schätzungen. Das Löschen auf einem externen Datenträger betrifft dessen Speicher; synchronisierte Löschungen können andere Geräte betreffen.
 • Der Dateianbieter kann den gewünschten Startort der Dateien-Auswahl ignorieren.

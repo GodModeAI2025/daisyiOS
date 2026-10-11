@@ -1,4 +1,4 @@
-daisyiOS is a native SwiftUI storage analyzer for iPhone and iPad, requiring iOS 27. No account or sign-in is required.
+OrbitDisk is a native SwiftUI storage analyzer for iPhone and iPad, requiring iOS 27. No account or sign-in is required.
 
 To test: open the Analyze tab (German navigation title: Entdecken), choose Eigene App-Daten to scan the app container, then open the App-Container result. Tap a sunburst segment to show actions. Alternatively choose Ordner oder Datenträger wählen and grant a folder through Apple's document picker.
 
