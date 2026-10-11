@@ -6,8 +6,9 @@ final class ScanResult {
     private(set) var root: FileNode
     let isAppContainer: Bool
     let unreadableEntries: Int
-    private let accessLease: FolderAccessLease?
+    let accessLease: FolderAccessLease?
     var isDeleting = false
+    var deletionProgress = 0
     var errorMessage: String?
 
     init(root: FileNode, isAppContainer: Bool, accessLease: FolderAccessLease? = nil, unreadableEntries: Int = 0) {
@@ -19,6 +20,37 @@ final class ScanResult {
     func find(_ url: URL) -> FileNode? { root.find(url) }
     func canDelete(_ node: FileNode) -> Bool {
         FileDeletionService.isAllowed(node.url, root: root.url, isAppContainer: isAppContainer)
+    }
+    func deleteDuplicateGroup(_ files: [DuplicateFile], keeping keep: DuplicateFile, hash: String) async -> (removed: Set<String>, failed: Int, stopped: Bool) {
+        guard !isDeleting else { return ([], files.count, false) }
+        isDeleting = true
+        deletionProgress = 0
+        defer { isDeleting = false }
+        var removed: Set<String> = []
+        var failed = 0
+        let service = FileDeletionService()
+        var lastUpdate = Date.distantPast
+        for (index, file) in files.enumerated() {
+            if Task.isCancelled { break }
+            do {
+                try await service.removeDuplicate(file, keeping: keep, hash: hash, root: root.url, isAppContainer: isAppContainer)
+                removed.insert(file.id)
+            } catch {
+                if !Task.isCancelled { failed += 1; errorMessage = error.localizedDescription }
+            }
+            if Date().timeIntervalSince(lastUpdate) > 0.15 {
+                deletionProgress = index + 1
+                lastUpdate = Date()
+            }
+        }
+        let snapshot = root
+        let deletedPaths = removed
+        root = await Task.detached {
+            var updated = snapshot
+            updated.removeDescendants(paths: deletedPaths)
+            return updated
+        }.value
+        return (removed, failed, Task.isCancelled)
     }
     func delete(_ node: FileNode) async -> Bool {
         guard !isDeleting else { return false }
@@ -37,9 +69,26 @@ final class ScanResult {
 
 extension FileNode {
     func find(_ target: URL) -> FileNode? {
-        if url.standardizedFileURL == target.standardizedFileURL { return self }
-        for child in children { if let found = child.find(target) { return found } }
+        let expected = target.standardizedFileURL
+        let components = expected.pathComponents
+        if url.standardizedFileURL.pathComponents == components { return self }
+        for child in children {
+            let childURL = child.url.standardizedFileURL
+            if childURL.pathComponents == components { return child }
+            if child.isDirectory, components.starts(with: childURL.pathComponents) {
+                return child.find(expected)
+            }
+        }
         return nil
+    }
+    mutating func removeDescendants(paths: Set<String>) {
+        children.removeAll { paths.contains($0.url.path) }
+        for index in children.indices where children[index].isDirectory { children[index].removeDescendants(paths: paths) }
+        if isDirectory {
+            aggregateSize = size + children.reduce(0) { $0 + $1.aggregateSize }
+            fileCount = children.reduce(0) { $0 + $1.fileCount }
+            directoryCount = 1 + children.reduce(0) { $0 + $1.directoryCount }
+        }
     }
     mutating func removeDescendant(_ target: URL) {
         children.removeAll { $0.url.standardizedFileURL == target.standardizedFileURL }
@@ -73,6 +122,28 @@ actor FileDeletionService {
         let parts = url.pathComponents
         let parent = base.pathComponents
         return parts.count > parent.count && Array(parts.prefix(parent.count)) == parent
+    }
+    func removeDuplicate(_ file: DuplicateFile, keeping keep: DuplicateFile, hash: String, root: URL, isAppContainer: Bool) throws {
+        guard file.url.standardizedFileURL != keep.url.standardizedFileURL,
+              Self.isAllowed(file.url, root: root, isAppContainer: isAppContainer),
+              Self.isAllowed(keep.url, root: root, isAppContainer: isAppContainer) else { throw DeletionError.protectedLocation }
+        var coordinationError: NSError?
+        var failure: (any Error)?
+        NSFileCoordinator().coordinate(readingItemAt: keep.url, options: [], writingItemAt: file.url, options: .forDeleting, error: &coordinationError) { keptURL, removedURL in
+            do {
+                guard Self.isAllowed(removedURL, root: root, isAppContainer: isAppContainer),
+                      Self.isAllowed(keptURL, root: root, isAppContainer: isAppContainer) else { throw DeletionError.protectedLocation }
+                let kept = DuplicateFile(url: keptURL, size: keep.size, modified: keep.modified, identity: keep.identity)
+                let removed = DuplicateFile(url: removedURL, size: file.size, modified: file.modified, identity: file.identity)
+                guard try DuplicateEngine.digest(kept) == hash, try DuplicateEngine.digest(removed) == hash else {
+                    throw NSError(domain: "OrbitDisk", code: 2, userInfo: [NSLocalizedDescriptionKey: "Inhalte sind nicht mehr identisch. Bitte erneut vergleichen."])
+                }
+                try Task.checkCancellation()
+                try FileManager.default.removeItem(at: removedURL)
+            } catch { failure = error }
+        }
+        if let coordinationError { throw coordinationError }
+        if let failure { throw failure }
     }
     func remove(_ url: URL, root: URL, isAppContainer: Bool) throws {
         guard Self.isAllowed(url, root: root, isAppContainer: isAppContainer) else { throw DeletionError.protectedLocation }

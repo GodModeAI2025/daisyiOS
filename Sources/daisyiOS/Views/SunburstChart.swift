@@ -12,6 +12,8 @@ struct RingSegment: Identifiable, Sendable {
 struct SunburstChart: View {
     let root: FileNode
     @Binding var selected: FileNode?
+    var onOpenFolder: (FileNode) -> Void = { _ in }
+    var onGoBack: (() -> Void)?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var cachedSegments: [RingSegment] = []
@@ -55,7 +57,7 @@ struct SunburstChart: View {
                     if !typeSize.isAccessibilitySize {
                         Text((selected ?? root).aggregateSize.formattedBytes)
                             .font(.headline).fontDesign(.rounded).contentTransition(reduceMotion ? .opacity : .numericText())
-                        Text(selected == nil ? "Gesamt" : "Ausgewählt")
+                        Text(onGoBack != nil ? "↑ Zurück" : selected == nil ? "Gesamt" : "Ausgewählt")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     }
@@ -76,16 +78,21 @@ struct SunburstChart: View {
                 let dy = point.y - proxy.size.height / 2
                 let radius = min(proxy.size.width, proxy.size.height) * 0.48
                 let distance = hypot(dx, dy) / radius
+                if distance < 0.35, let onGoBack { onGoBack(); return }
                 var angle = atan2(dy, dx)
                 if angle < -.pi / 2 { angle += 2 * .pi }
                 let hit = segments.first {
                     distance >= 0.39 + Double($0.depth) * 0.19 && distance <= 0.57 + Double($0.depth) * 0.19 && angle >= $0.start && angle <= $0.end
                 }?.node
+                if let hit, hit.isDirectory { onOpenFolder(hit); return }
                 withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.42, dampingFraction: 0.76)) { selected = hit }
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Speicherdiagramm")
-            .accessibilityValue("\(root.aggregateSize.formattedBytes), \(root.fileCount) Dateien. Alle Einträge stehen in der Liste darunter.")
+            .accessibilityValue("\(root.aggregateSize.formattedBytes), \(root.fileCount) Dateien. Ordner antippen öffnet ihren Inhalt. Alle Einträge stehen in der Liste darunter.")
+            .accessibilityActions {
+                if let onGoBack { Button("Zur vorherigen Ansicht", action: onGoBack) }
+            }
         }
     }
     nonisolated static func segments(for root: FileNode) -> [RingSegment] {
@@ -99,7 +106,7 @@ struct SunburstChart: View {
             for (index, child) in children.enumerated() {
                 let next = angle + (end - start) * Double(child.aggregateSize) / total
                 let colorIndex = color ?? index
-                if next - angle >= 0.04 {
+                if next - angle >= 0.02 {
                     result.append(RingSegment(node: child, start: angle, end: next, depth: depth, colorIndex: colorIndex))
                     append(child, start: angle, end: next, depth: depth + 1, color: colorIndex)
                 }

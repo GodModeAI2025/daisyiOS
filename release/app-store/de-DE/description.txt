@@ -5,13 +5,19 @@ ORDNER ENTDECKEN
 Wähle einen Ordner über die Dateien-Auswahl: auf deinem Gerät, in iCloud Drive oder auf einem verbundenen Datenträger, sofern der Dateianbieter ihn bereitstellt. Erkunde Unterordner und finde große Einträge in der nach Größe sortierten Liste.
 
 SPEICHER SICHTBAR MACHEN
-Tippe einen Bereich im Ringdiagramm. Die Auswahl hebt sich hervor und zeigt ihren Speicherbedarf. Suche nach Datei- und Ordnernamen oder öffne den nächsten Ordner.
+Tippe einen Ordner im Ringdiagramm, um seinen Inhalt zu öffnen. Die Mitte führt zurück. In der Liste stehen Ordner vor Dateien; Filter, Größen- und Namenssortierung helfen beim Erkunden. Dateien lassen sich für Vorschau und Aktionen auswählen.
 
 ANALYSE MIT FORTSCHRITT
 Die Ladeanzeige zeigt erfasste Dateien, Ordner und Laufzeit. Die Analyse lässt sich abbrechen. Nicht lesbare Einträge werden ausdrücklich gemeldet. Es gibt keine feste Dateigrenze. Sehr kleine Diagrammsegmente werden grau dargestellt; alle lesbaren Einträge stehen in der Liste.
 
 DATEIEN PRÜFEN UND AUFRÄUMEN
 Starte Quick Look bei unterstützten Dateien. Öffne die native Dateien-Auswahl am gewünschten Speicherort, soweit der Anbieter das unterstützt. Lösche ausgewählte Dateien oder Ordner erst nach einer ausdrücklichen Sicherheitsabfrage. Die Analyse aktualisiert anschließend ihre Größen und Einträge.
+
+ORDNER PRÜFEN
+„Ordner prüfen“ findet mögliche temporäre Daten, Logs, Caches, Build-Reste und unvollständige Downloads im aktuellen Ordner und darunter. Jeder Vorschlag nennt Grund und Speicherort. Nichts wird automatisch gelöscht.
+
+DUPLIKATE FINDEN
+Vergleiche Dateien nach vollständigem Inhalt mit SHA-256. Wähle pro Gruppe die Kopie, die bleiben soll; andere Kopien werden erst nach Bestätigung und erneuter Inhaltsprüfung entfernt. Links und bestimmte Cache-/Build-Bereiche werden ausgelassen. Neue Dateien werden nach erneuter Speicheranalyse erfasst.
 
 LOKAL ANALYSIEREN
 Die App benötigt kein Benutzerkonto und überträgt keine Analyseergebnisse. Cloud-Dateianbieter können Dateien zum Öffnen oder Analysieren bereitstellen oder laden.

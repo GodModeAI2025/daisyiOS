@@ -5,6 +5,9 @@ struct FolderDetailView: View {
     let node: FileNode
     var title: String? = nil
     let result: ScanResult
+    @Environment(\.dismiss) private var dismiss
+    @State private var orbFolder: FileNode?
+    @State private var showOrbFolder = false
     @State private var query = ""
     @State private var selected: FileNode?
     @State private var selectionRevision = 0
@@ -27,10 +30,14 @@ struct FolderDetailView: View {
                         VStack(spacing: 12) {
                             Label("DEIN SPEICHER, NEU GESEHEN", systemImage: "sparkles")
                                 .font(.caption.weight(.semibold)).foregroundStyle(.indigo)
-                            SunburstChart(root: current, selected: selection).frame(height: 300)
+                            SunburstChart(root: current, selected: selection, onOpenFolder: { folder in
+                                orbFolder = folder
+                                showOrbFolder = true
+                            }, onGoBack: current.url == result.root.url ? nil : { dismiss() })
+                                .frame(height: 300)
                             Label("Grau: sehr kleine Einträge und Ordnerbelegung", systemImage: "circle.fill")
                                 .font(.caption).foregroundStyle(.secondary)
-                            Text("Tippe einen Bereich, um ihn zu entdecken. Sehr kleine Einträge stehen vollständig in der Liste.")
+                            Text("Ordner im Orb antippen: Unterordner öffnen. Datei antippen: Aktionen anzeigen. In Unterordnern führt die Mitte zurück. Kleine Einträge findest du in der Liste.")
                                 .font(.subheadline).foregroundStyle(.secondary)
                             Text("\(current.fileCount) Dateien · \(max(0, current.directoryCount - 1)) Ordner")
                                 .font(.subheadline).monospacedDigit()
@@ -59,6 +66,21 @@ struct FolderDetailView: View {
             .cosmicScreen()
             .navigationTitle(title ?? node.name)
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $showOrbFolder) {
+                if let folder = orbFolder { FolderDetailView(node: folder, result: result) }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        NavigationLink { CleanupView(root: result.find(node.url) ?? node, result: result) } label: {
+                            Label("Aufräumkandidaten finden", systemImage: "sparkles")
+                        }
+                        NavigationLink { DuplicateView(root: result.find(node.url) ?? node, result: result) } label: {
+                            Label("Duplikate finden", systemImage: "document.on.document")
+                        }
+                    } label: { Label("Ordner prüfen", systemImage: "ellipsis.circle").labelStyle(.titleAndIcon) }
+                }
+            }
             .searchable(text: $query, prompt: "Dateien und Ordner suchen")
         }
     }
@@ -71,38 +93,65 @@ struct FolderContents: View {
     @Binding var selected: FileNode?
     @State private var visibleChildren: [FileNode] = []
     @State private var preparing = true
+    @State private var filter: EntryFilter = .all
+    @State private var sort: EntrySort = .largest
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 16) {
             Text("Inhalt").font(.title3.bold())
-            Text("Nach Speicherbedarf sortiert").font(.subheadline).foregroundStyle(.secondary)
+            Text("Ordner stehen immer vor Dateien. Tippe einen Ordner, um seinen Inhalt zu sehen.")
+                .font(.subheadline).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 10) {
+                Menu {
+                    Picker("Einträge anzeigen", selection: $filter) {
+                        ForEach(EntryFilter.allCases) { value in Text(value.rawValue).tag(value) }
+                    }
+                } label: { Label(filter.rawValue, systemImage: "line.3.horizontal.decrease") }
+                Menu {
+                    Picker("Sortierung", selection: $sort) {
+                        ForEach(EntrySort.allCases) { value in Text(value.rawValue).tag(value) }
+                    }
+                } label: { Label(sort.rawValue, systemImage: "arrow.up.arrow.down") }
+            }.buttonStyle(.bordered).controlSize(.large)
+            Text("\(visibleChildren.count) Einträge angezeigt").font(.caption).foregroundStyle(.secondary)
             if preparing { ProgressView("Dateiliste wird vorbereitet …") }
             if !preparing, visibleChildren.isEmpty {
-                ContentUnavailableView(query.isEmpty ? "Ordner ist leer" : "Keine Treffer", systemImage: query.isEmpty ? "folder" : "magnifyingglass")
+                ContentUnavailableView(query.isEmpty && filter == .all ? "Ordner ist leer" : "Keine passenden Einträge", systemImage: "magnifyingglass", description: Text("Passe Filter oder Suche an."))
             }
             ForEach(visibleChildren) { child in
                 VStack(spacing: 12) {
-                    Button {
-                        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.42, dampingFraction: 0.8)) { selected = child }
-                    } label: { FileRow(node: child) }
-                        .buttonStyle(.plain).frame(minHeight: 44)
-                        .accessibilityHint("Zeigt Aktionen für diesen Eintrag")
                     if child.isDirectory {
                         NavigationLink { FolderDetailView(node: child, result: result) } label: {
-                            Label("Ordner erkunden", systemImage: "arrow.down.right.and.arrow.up.left")
-                        }.font(.subheadline)
+                            HStack {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    FileRow(node: child)
+                                    Label("Unterordner öffnen", systemImage: "chevron.right").font(.caption)
+                                }
+                                Spacer(minLength: 8)
+                                Image(systemName: "chevron.right")
+                            }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+                        }.buttonStyle(.plain).frame(minHeight: 44)
+                            .accessibilityHint("Öffnet den Ordner in OrbitDisk")
+                    } else {
+                        Button { select(child) } label: { FileRow(node: child).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }
+                            .buttonStyle(.plain).frame(minHeight: 44)
+                            .accessibilityHint("Zeigt Vorschau und Dateiaktionen")
                     }
+                    Button { select(child) } label: {
+                        Label(child.isDirectory ? "Ordneraktionen anzeigen" : "Dateiaktionen anzeigen", systemImage: "ellipsis.circle")
+                    }.font(.subheadline).buttonStyle(.bordered)
                     Divider()
                 }
             }
         }.cosmicCard()
-        .task(id: "\(node.id)-\(node.aggregateSize)-\(node.fileCount)-\(node.directoryCount)-\(node.children.count)-\(query)") {
+        .task(id: "\(node.id)-\(node.aggregateSize)-\(node.fileCount)-\(node.directoryCount)-\(node.children.count)-\(query)-\(filter.rawValue)-\(sort.rawValue)") {
             preparing = true
             let snapshot = node.children
             let search = query
+            let chosenFilter = filter
+            let chosenSort = sort
             let worker = Task.detached(priority: .userInitiated) {
-                snapshot.filter { search.isEmpty || $0.name.localizedStandardContains(search) }
-                    .sorted { $0.aggregateSize > $1.aggregateSize }
+                DirectoryListing.entries(snapshot, query: search, filter: chosenFilter, sort: chosenSort)
             }
             let children = await worker.value
             guard !Task.isCancelled else { return }
@@ -110,12 +159,17 @@ struct FolderContents: View {
             preparing = false
         }
     }
+    private func select(_ child: FileNode) {
+        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.42, dampingFraction: 0.8)) { selected = child }
+    }
+
 }
 
 struct FileActionPanel: View {
     let node: FileNode
     let result: ScanResult
     var isSelection = false
+    var allowsDeletion = true
     var onDelete: () -> Void = {}
     @State private var previewURL: URL?
     @State private var showBrowser = false
@@ -127,23 +181,24 @@ struct FileActionPanel: View {
             HStack(alignment: .top) {
                 Image(systemName: node.isDirectory ? "folder.fill" : "doc.fill").font(.title2).foregroundStyle(.indigo)
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(isSelection ? "Ausgewählt" : "Dieser Ordner").font(.caption).foregroundStyle(.secondary)
+                    Text(isSelection ? "Ausgewählt" : node.isDirectory ? "Dieser Ordner" : "Diese Datei").font(.caption).foregroundStyle(.secondary)
                     Text(node.url == result.root.url && result.isAppContainer ? "App-Container" : node.name).font(.headline).textSelection(.enabled)
                     Text(node.aggregateSize.formattedBytes).font(.title2.bold()).fontDesign(.rounded)
                 }
             }
             if node.isDirectory, isSelection {
                 NavigationLink { FolderDetailView(node: node, result: result) } label: {
-                    Label("Ordner erkunden", systemImage: "arrow.down.right.and.arrow.up.left")
+                    Label("Unterordner in OrbitDisk öffnen", systemImage: "folder.badge.plus")
                 }.buttonStyle(.borderedProminent).controlSize(.large)
             }
             Button { showBrowser = true } label: {
-                Label("In Dateien anzeigen", systemImage: "folder.badge.gearshape")
+                Label("Speicherort in Dateien anzeigen", systemImage: "folder")
             }.buttonStyle(.bordered).controlSize(.large)
             if !node.isDirectory, QLPreviewController.canPreview(node.url as NSURL) {
-                Button { previewURL = node.url } label: { Label("Quick Look", systemImage: "eye") }
+                Button { previewURL = node.url } label: { Label("Dateivorschau (Quick Look)", systemImage: "eye") }
                     .buttonStyle(.bordered).controlSize(.large)
             }
+            if allowsDeletion {
             Button(role: .destructive) { pendingDeletion = node } label: {
                 Label(result.isDeleting ? "Wird gelöscht …" : "Löschen …", systemImage: "trash")
             }.buttonStyle(.bordered).controlSize(.large)
@@ -151,6 +206,7 @@ struct FileActionPanel: View {
             if !result.canDelete(node) {
                 Text("Der Analyseordner und interne App-Einstellungen sind vor dem Löschen geschützt.")
                     .font(.footnote).foregroundStyle(.secondary)
+            }
             }
             Text(result.isAppContainer && FileLocations.browserDirectory(for: node, root: result.root.url, isAppContainer: true) != (node.isDirectory ? node.url : node.url.deletingLastPathComponent()) ? "Interne App-Ordner sind in Dateien nicht sichtbar. Hier öffnet sich der Dokumente-Bereich." : "Öffnet die Dateien-Auswahl am gewünschten Speicherort, sofern verfügbar.")
                 .font(.footnote).foregroundStyle(.secondary)
