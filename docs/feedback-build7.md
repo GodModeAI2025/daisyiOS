@@ -13,4 +13,8 @@ Die reale Screenshot-Datei mit privaten Dateinamen wird nicht im Repository gesp
 
 ## Prüfung
 
-Xcode-MCP-Build und signiertes Archiv bestanden. Im isolierten Simulator stehen beide Optionsfelder bei normaler Schrift nebeneinander; lange Ordnernamen bleiben lesbar. Die Ordnerzeile öffnet die richtige Analyseebene, Zurück führt zum Ausgangsordner. Bei maximaler Bedienungshilfen-Schrift bleiben die Optionswerte auf voller Breite lesbar. Synthetische Nachweise unter `screenshots/feedback-build7-*.png`.
+Xcode-MCP-Build und signiertes Archiv bestanden. Im isolierten Simulator stehen beide Optionsfelder bei normaler Schrift nebeneinander; lange Ordnernamen bleiben lesbar. Helle und dunkle Darstellung sind ohne Überlappung geprüft; die Auswahl beider Testeinträge ergibt korrekt 29 KB. Die Ordnerzeile öffnet die richtige Analyseebene, Zurück führt zum Ausgangsordner. Bei maximaler Bedienungshilfen-Schrift bleiben die Optionswerte auf voller Breite lesbar. Synthetische Nachweise unter `screenshots/feedback-build7-*.png`.
+
+## Auslieferung
+
+Version 1.0 (7) am 11. Oktober 2026 um 22:25 Uhr (Europe/Berlin) erfolgreich hochgeladen. Exportangaben gespeichert; in der bestehenden internen Gruppe „Mark – Intern“ als „Im Test“ bestätigt.
