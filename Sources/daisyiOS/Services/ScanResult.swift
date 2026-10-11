@@ -21,6 +21,33 @@ final class ScanResult {
     func canDelete(_ node: FileNode) -> Bool {
         FileDeletionService.isAllowed(node.url, root: root.url, isAppContainer: isAppContainer)
     }
+    func deleteNodes(_ nodes: [FileNode]) async -> (removed: Set<String>, failed: Int, stopped: Bool) {
+        guard !isDeleting else { return ([], nodes.count, false) }
+        isDeleting = true
+        deletionProgress = 0
+        defer { isDeleting = false }
+        let plan = await Task.detached { DeletionSelection.minimalRoots(nodes) }.value
+        let service = FileDeletionService()
+        var removed: Set<String> = []
+        var failed = 0
+        var lastUpdate = Date.distantPast
+        for (index, node) in plan.enumerated() {
+            if Task.isCancelled { break }
+            do {
+                try await service.remove(node.url, root: root.url, isAppContainer: isAppContainer)
+                removed.insert(node.url.standardizedFileURL.path)
+            } catch { failed += 1; errorMessage = error.localizedDescription }
+            if Date().timeIntervalSince(lastUpdate) > 0.15 { deletionProgress = index + 1; lastUpdate = Date() }
+        }
+        let snapshot = root
+        let paths = removed
+        root = await Task.detached {
+            var updated = snapshot
+            updated.removeDescendants(paths: paths)
+            return updated
+        }.value
+        return (removed, failed, Task.isCancelled)
+    }
     func deleteDuplicateGroup(_ files: [DuplicateFile], keeping keep: DuplicateFile, hash: String) async -> (removed: Set<String>, failed: Int, stopped: Bool) {
         guard !isDeleting else { return ([], files.count, false) }
         isDeleting = true

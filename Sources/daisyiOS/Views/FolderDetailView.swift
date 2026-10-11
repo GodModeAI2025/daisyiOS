@@ -8,6 +8,7 @@ struct FolderDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var orbFolder: FileNode?
     @State private var showOrbFolder = false
+    @State private var batch = BatchSelection()
     @State private var query = ""
     @State private var selected: FileNode?
     @State private var selectionRevision = 0
@@ -48,7 +49,7 @@ struct FolderDetailView: View {
                         .id(selected?.id ?? current.id)
                         .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 12)))
                         .id("file-actions")
-                        FolderContents(node: current, result: result, query: query, selected: selection)
+                        FolderContents(node: current, result: result, query: query, selected: selection, batch: batch)
                     }
                     .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.85), value: current.aggregateSize)
                     .padding(20)
@@ -62,6 +63,9 @@ struct FolderDetailView: View {
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) {
                     scroll.scrollTo("file-actions", anchor: .top)
                 }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if batch.count > 0 || batch.busy || batch.message != nil { BatchSelectionBar(selection: batch, result: result) }
             }
             .cosmicScreen()
             .navigationTitle(title ?? node.name)
@@ -91,6 +95,8 @@ struct FolderContents: View {
     let result: ScanResult
     let query: String
     @Binding var selected: FileNode?
+    let batch: BatchSelection
+    @State private var selecting = false
     @State private var visibleChildren: [FileNode] = []
     @State private var preparing = true
     @State private var filter: EntryFilter = .all
@@ -106,19 +112,30 @@ struct FolderContents: View {
                     Picker("Einträge anzeigen", selection: $filter) {
                         ForEach(EntryFilter.allCases) { value in Text(value.rawValue).tag(value) }
                     }
-                } label: { Label(filter.rawValue, systemImage: "line.3.horizontal.decrease") }
+                } label: { OrbitOptionLabel(title: "Anzeigen", value: filter.rawValue, symbol: "line.3.horizontal.decrease") }
                 Menu {
                     Picker("Sortierung", selection: $sort) {
                         ForEach(EntrySort.allCases) { value in Text(value.rawValue).tag(value) }
                     }
-                } label: { Label(sort.rawValue, systemImage: "arrow.up.arrow.down") }
-            }.buttonStyle(.bordered).controlSize(.large)
+                } label: { OrbitOptionLabel(title: "Sortieren", value: sort.rawValue, symbol: "arrow.up.arrow.down") }
+            }.buttonStyle(.plain)
             Text("\(visibleChildren.count) Einträge angezeigt").font(.caption).foregroundStyle(.secondary)
+            Button(selecting ? "Auswahl beenden" : "Einträge auswählen") {
+                selecting.toggle()
+                if !selecting { batch.clear() }
+            }.buttonStyle(OrbitActionStyle()).disabled(batch.busy)
+            if selecting {
+                Button(query.isEmpty && filter == .all ? "Alle angezeigten Einträge auswählen" : "Alle Treffer auswählen") { batch.select(visibleChildren) }
+                    .buttonStyle(OrbitActionStyle()).disabled(batch.busy)
+                Button("Auswahl aufheben") { batch.clear() }.buttonStyle(OrbitActionStyle()).disabled(batch.busy)
+            }
             if preparing { ProgressView("Dateiliste wird vorbereitet …") }
             if !preparing, visibleChildren.isEmpty {
                 ContentUnavailableView(query.isEmpty && filter == .all ? "Ordner ist leer" : "Keine passenden Einträge", systemImage: "magnifyingglass", description: Text("Passe Filter oder Suche an."))
             }
             ForEach(visibleChildren) { child in
+                HStack(alignment: .top, spacing: 10) {
+                    if selecting { SelectionCheckbox(node: child, selection: batch) }
                 VStack(spacing: 12) {
                     if child.isDirectory {
                         NavigationLink { FolderDetailView(node: child, result: result) } label: {
@@ -139,8 +156,9 @@ struct FolderContents: View {
                     }
                     Button { select(child) } label: {
                         Label(child.isDirectory ? "Ordneraktionen anzeigen" : "Dateiaktionen anzeigen", systemImage: "ellipsis.circle")
-                    }.font(.subheadline).buttonStyle(.bordered)
+                    }.font(.subheadline).buttonStyle(OrbitActionStyle())
                     Divider()
+                }
                 }
             }
         }.cosmicCard()
@@ -189,24 +207,19 @@ struct FileActionPanel: View {
             if node.isDirectory, isSelection {
                 NavigationLink { FolderDetailView(node: node, result: result) } label: {
                     Label("Unterordner in OrbitDisk öffnen", systemImage: "folder.badge.plus")
-                }.buttonStyle(.borderedProminent).controlSize(.large)
+                }.buttonStyle(OrbitActionStyle(prominent: true))
             }
             Button { showBrowser = true } label: {
                 Label("Speicherort in Dateien anzeigen", systemImage: "folder")
-            }.buttonStyle(.bordered).controlSize(.large)
+            }.buttonStyle(OrbitActionStyle())
             if !node.isDirectory, QLPreviewController.canPreview(node.url as NSURL) {
                 Button { previewURL = node.url } label: { Label("Dateivorschau (Quick Look)", systemImage: "eye") }
-                    .buttonStyle(.bordered).controlSize(.large)
+                    .buttonStyle(OrbitActionStyle())
             }
-            if allowsDeletion {
-            Button(role: .destructive) { pendingDeletion = node } label: {
-                Label(result.isDeleting ? "Wird gelöscht …" : "Löschen …", systemImage: "trash")
-            }.buttonStyle(.bordered).controlSize(.large)
-                .disabled(!result.canDelete(node) || result.isDeleting)
-            if !result.canDelete(node) {
-                Text("Der Analyseordner und interne App-Einstellungen sind vor dem Löschen geschützt.")
-                    .font(.footnote).foregroundStyle(.secondary)
-            }
+            if allowsDeletion && result.canDelete(node) {
+                Button(role: .destructive) { pendingDeletion = node } label: {
+                    Label(result.isDeleting ? "Wird gelöscht …" : "Löschen …", systemImage: "trash")
+                }.buttonStyle(OrbitActionStyle()).disabled(result.isDeleting)
             }
             Text(result.isAppContainer && FileLocations.browserDirectory(for: node, root: result.root.url, isAppContainer: true) != (node.isDirectory ? node.url : node.url.deletingLastPathComponent()) ? "Interne App-Ordner sind in Dateien nicht sichtbar. Hier öffnet sich der Dokumente-Bereich." : "Öffnet die Dateien-Auswahl am gewünschten Speicherort, sofern verfügbar.")
                 .font(.footnote).foregroundStyle(.secondary)

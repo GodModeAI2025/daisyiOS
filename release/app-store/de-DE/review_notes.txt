@@ -9,3 +9,5 @@ External USB storage is optional, not required. The user can test with local fil
 Please review this version normally. Release should remain manual.
 
 Folder tools: Ordner prüfen → Aufräumkandidaten finden lists possible disposable data recursively, without preselection. Duplikate finden compares complete file bytes with SHA-256 via Apple's CryptoKit (hashing only; no encryption implementation). Choose a retained copy, then confirm removal of other copies. Both copies are revalidated immediately before deletion. No app account is required.
+
+Build 5: Cleanup candidates → Funde auswählen enables multi-selection and Alle Funde auswählen. The bottom bar shows selected count/size and opens a shared deletion confirmation. Folder lists offer the same selection for visible search/filter matches. Deletion remains scoped and protects the analysis root. Action buttons use consistent full-width rounded rows.

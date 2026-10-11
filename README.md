@@ -21,6 +21,8 @@ Ordnersegmente im Orb öffnen direkt ihre Unterordner; die Orb-Mitte führt zur 
 
 „Ordner prüfen“ bietet rekursive Aufräumkandidaten und einen inhaltsbasierten Duplikatfinder mit auswählbarer Kopie zum Behalten und bestätigter Entfernung. Regeln und Prüfverhalten stehen in [docs/cleanup-and-duplicates.md](docs/cleanup-and-duplicates.md).
 
+Build 5 ergänzt Mehrfachauswahl und „Alle Funde auswählen“ in Aufräumkandidaten sowie Auswahl aktueller Such-/Filtertreffer in der Dateiliste. Die bestätigte Auswahl wird gesammelt entfernt; betroffene Dateistruktur und Größen aktualisieren sich im Hintergrund. Aktions- und Optionszeilen ersetzen die uneinheitlichen Pillen-Buttons. Details: [docs/feedback-build5.md](docs/feedback-build5.md).
+
 ## Build
 
 Xcode 27 mit iOS-27-SDK und XcodeGen:
@@ -34,11 +36,11 @@ Scheme: `daisyiOS`. Mindestversion: `27.0`, Gerätefamilien: iPhone und iPad.
 
 ## Validierung
 
-Am 11. Oktober 2026 mit Xcode 27 über Xcode-MCP gebaut. 27 Tests bestehen, einschließlich rekursiver Kandidaten, vollständiger Inhaltsduplikate, Hardlink-Schutz, Schutz bei geändertem Keeper, gebündelter Entfernung und Ordner-/Filtersortierung. Weitere Fälle: Größenaggregation, 5.000 Dateien ohne Verlust, Fortschritt, Abbruch, Diagramm mit 10.000 Einträgen ohne 10.000 SwiftUI-Segmente sowie Lösch- und Pfadschutz. Die Testzahlen sind keine Dateigrenzen.
+Am 11. Oktober 2026 mit Xcode 27 über Xcode-MCP gebaut. 30 Tests bestehen, einschließlich rekursiver Kandidaten, vollständiger Inhaltsduplikate, Hardlink-Schutz, Schutz bei geändertem Keeper, gebündelter Entfernung und Ordner-/Filtersortierung. Weitere Fälle: Größenaggregation, 5.000 Dateien ohne Verlust, Fortschritt, Abbruch, Diagramm mit 10.000 Einträgen ohne 10.000 SwiftUI-Segmente sowie Lösch- und Pfadschutz. Die Testzahlen sind keine Dateigrenzen.
 
 Der neue Einstieg, die native Ordnerauswahl, ein vollständiger Scan mit 200.000 Dateien und 200 Unterordnern, die sichtbare Ladeanzeige während des Scans und ein tatsächlich bedienbarer Abbruch wurden auf einem isolierten iOS-27-Simulator geprüft. Screenshots liegen unter `screenshots/feedback-*.png`. Die 200.000 Dateien sind eine Testmenge, keine Grenze. Nicht lesbare Provider-Inhalte werden ausdrücklich gemeldet; reale Cloud-/USB-Anbieter brauchen weiterhin Geräteprüfung.
 
-Version 1.0 (4) steht in TestFlight für die interne Gruppe „Mark – Intern“ auf „Im Test“. Build 3 enthält den direkten Einstieg ohne Tab-Leiste und App-Container-Auswahl sowie den überarbeiteten Scan. Die Upload- und Simulatornachweise werden in `release/status.json` lokal festgehalten. Eine Simulatorprüfung ersetzt keine Prüfung mit realen Cloud-/USB-Dateianbietern. App-Review ist wegen offener Pflichtangaben noch nicht eingereicht; Veröffentlichung bleibt manuell.
+Version 1.0 (5) steht in TestFlight für die interne Gruppe „Mark – Intern“ auf „Im Test“. Build 3 enthält den direkten Einstieg ohne Tab-Leiste und App-Container-Auswahl sowie den überarbeiteten Scan. Die Upload- und Simulatornachweise werden in `release/status.json` lokal festgehalten. Eine Simulatorprüfung ersetzt keine Prüfung mit realen Cloud-/USB-Dateianbietern. App-Review ist wegen offener Pflichtangaben noch nicht eingereicht; Veröffentlichung bleibt manuell.
 
 Für Build 4 sind Orb-Navigation und Zurück-Funktion, vollflächige Ordnerzeilen, Ordnergruppierung, Filter und Sortierung sowie Kandidaten- und Duplikat-Menüs im isolierten Simulator geprüft. Die Kopie zum Behalten und die Sicherheitsabfrage wurden bedient und abgebrochen; tatsächliche Entfernung samt Behalten und aktualisierter Dateistruktur ist durch Tests mit eigenen temporären Dateien abgesichert.
 

@@ -23,3 +23,39 @@ extension View {
         scrollContentBackground(.hidden).background { CosmicBackdrop() }
     }
 }
+
+struct OrbitActionStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+    var prominent = false
+    func makeBody(configuration: Configuration) -> some View {
+        let destructive = configuration.role == .destructive
+        let tint: Color = destructive ? .red : .indigo
+        configuration.label
+            .font(.body.weight(.medium))
+            .frame(maxWidth: .infinity, minHeight: 24, alignment: .leading)
+            .padding(.horizontal, 16).padding(.vertical, 12)
+            .foregroundStyle(prominent ? .white : tint)
+            .background(prominent ? tint : tint.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
+            .overlay { RoundedRectangle(cornerRadius: 14).stroke(tint.opacity(prominent ? 0 : 0.16), lineWidth: 1) }
+            .contentShape(Rectangle())
+            .opacity(enabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
+    }
+}
+struct OrbitOptionLabel: View {
+    let title: String
+    let value: String
+    let symbol: String
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol).foregroundStyle(.indigo)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.caption).foregroundStyle(.secondary)
+                Text(value).font(.body.weight(.medium)).foregroundStyle(.primary)
+            }
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(.secondary)
+        }.padding(14)
+            .background(Color(uiColor: .tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+            .contentShape(Rectangle())
+    }
+}

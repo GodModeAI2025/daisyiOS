@@ -5,6 +5,8 @@ struct CleanupView: View {
     let result: ScanResult
     @State private var candidates: [CleanupCandidate] = []
     @State private var loading = true
+    @State private var selection = BatchSelection()
+    @State private var selecting = false
     var body: some View {
         List {
             Section {
@@ -14,9 +16,21 @@ struct CleanupView: View {
             }
             if loading { ProgressView("Aufräumkandidaten werden ermittelt …") }
             else {
+                Section {
+                    Button(selecting ? "Auswahl beenden" : "Funde auswählen") {
+                        selecting.toggle()
+                        if !selecting { selection.clear() }
+                    }.buttonStyle(OrbitActionStyle()).disabled(selection.busy)
+                    if selecting {
+                        Button("Alle Funde auswählen") { selection.select(candidates.map(\.node)) }.buttonStyle(OrbitActionStyle()).disabled(selection.busy)
+                        Button("Auswahl aufheben") { selection.clear() }.buttonStyle(OrbitActionStyle()).disabled(selection.busy)
+                    }
+                }
                 Section("\(candidates.count) Kandidaten · \(candidates.reduce(Int64(0)) { $0 + $1.node.aggregateSize }.formattedBytes)") {
                     if candidates.isEmpty { Text("Keine passenden temporären Daten oder Protokolle gefunden.") }
                     ForEach(candidates) { candidate in
+                        HStack(spacing: 10) {
+                        if selecting { SelectionCheckbox(node: candidate.node, selection: selection) }
                         NavigationLink {
                             CleanupCandidateDetail(candidate: candidate, root: root.url, result: result)
                         } label: {
@@ -26,9 +40,12 @@ struct CleanupView: View {
                                 Text(candidate.node.url.path.replacingOccurrences(of: root.url.path + "/", with: "")).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                             }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
                         }
+                        }
                     }
                 }
             }
+        }.safeAreaInset(edge: .bottom) {
+            if selection.count > 0 || selection.busy || selection.message != nil { BatchSelectionBar(selection: selection, result: result) }
         }.cosmicScreen().navigationTitle("Aufräumkandidaten")
         .task(id: "\(result.root.aggregateSize)-\(result.root.fileCount)-\(result.root.directoryCount)") {
             loading = true
