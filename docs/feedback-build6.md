@@ -10,4 +10,8 @@ Originale Feedback-Screenshots mit echten Dateinamen werden nicht im Repository 
 
 ## Prüfung
 
-Xcode-MCP-Build und signiertes Archiv erfolgreich. Die Simulatorprüfung bestätigt die richtige Detailansicht und kompakte Darstellung bei normalen und maximalen Bedienungshilfen-Schriftgrößen. Bei großer Schrift bleibt die Taste einzeilig unter dem Eintrag; die Liste bleibt scrollbar. Synthetische Nachweise unter `screenshots/feedback-build6-*.png`. Neue Crash-Rückmeldungen lagen nicht vor.
+Xcode-MCP-Build und signiertes Archiv erfolgreich. Die Simulatorprüfung bestätigt getrennte Ordnernavigation, richtige Ordner-/Dateidetails, Auswahl aller drei eigenen Testeinträge und kompakte Darstellung in heller/dunkler Ansicht bei normalen und maximalen Bedienungshilfen-Schriftgrößen. Bei großer Schrift bleibt die Taste einzeilig unter dem Eintrag; die Liste bleibt scrollbar. Synthetische Nachweise unter `screenshots/feedback-build6-*.png`. Neue Crash-Rückmeldungen lagen nicht vor.
+
+## Auslieferung
+
+Version 1.0 (6) am 11. Oktober 2026 um 22:09 Uhr (Europe/Berlin) erfolgreich hochgeladen. Exportangaben gespeichert; interne Gruppe „Mark – Intern“ mit dem bestehenden Testeraccount auf „Im Test“ bestätigt. Physische Cloud-/USB-Dateianbieter bleiben eine separate Geräteprüfung.
