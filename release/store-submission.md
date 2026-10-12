@@ -1,16 +1,33 @@
-# App-Store-Einreichung: OrbitDisk 1.0 (7)
+# App-Store-Einreichung: OrbitDisk 1.0 (8)
 
-Am 12. Oktober 2026 beauftragt der Eigentümer die Store-Einreichung, Preis 0,99 EUR und Kontakt info@mobilebox-consulting.de. Die übrigen Masken dürfen eigenständig gepflegt werden. Die Datenschutzseite auf der Homepage wird vom Eigentümer erstellt; ihre endgültige URL fehlt noch.
+## Auftrag
 
-## Vorbereitet
+Weltweiter Vertrieb, Basispreis Deutschland 0,99 EUR, Kontakt info@mobilebox-consulting.de. Die Store-Masken dürfen eigenständig gepflegt werden. Datenschutzseite: https://www.mobilebox-consulting.de/datenschutzerkl%C3%A4rung-privacy-policy/ — Inhalt wird vom Eigentümer gepflegt.
 
-- Build 7 ist verarbeitet und intern auf TestFlight freigegeben.
-- Store-Beschreibung und Review-Hinweise sind lokal auf dem aktuellen Funktionsstand; Hinweis auf den entfernten Ordner-Details-Schalter korrigiert.
-- Quellprüfung: keine eigene Netzwerkanalyseübertragung, Werbe-/Tracking- oder Analytics-SDKs gefunden. PrivacyInfo.xcprivacy deklariert kein Tracking und keine gesammelten Daten. Dateizugriff erfolgt lokal auf ausgewählte Verzeichnisse; Cloud-Anbieter können Dateien übertragen.
-- Preis, Kontakt und Build-Auswahl sind in metadata.json für die Übertragung vorbereitet.
+## Aktuell bestätigt (12. Oktober 2026)
 
-## Noch nicht im Portal abgeschlossen
+- App Store Connect angemeldet; aktuelle deutsche Beschreibung und Review-Hinweise gespeichert.
+- Preisplan mit Deutschland als Basis und 0,99 EUR eingerichtet; entsprechende lokale Preise in anderen Ländern durch Apple.
+- Verfügbarkeit für alle 175 Länder/Regionen einschließlich zukünftiger Länder eingerichtet.
+- Altersfragebogen vollständig beantwortet, 4+ mit regionalen Entsprechungen gespeichert.
+- Review-Kontakt info@mobilebox-consulting.de gespeichert; kein App-Login erforderlich.
+- Datenschutz-URL gespeichert; „Keine Daten erfasst“ als Entwurf gespeichert, finale Veröffentlichung noch offen.
+- Build 8 erfolgreich hochgeladen (08:30 Uhr Europe/Berlin), verarbeitet, Exportangaben gespeichert und für „Mark – Intern“ auf „Im Test“ bestätigt.
+- Privacy Manifest um Dateizeitstempel-Nutzung für vom Nutzer gewählte Dateien ergänzt (3B52.1); Datenschutz und Support in der App verlinkt. Xcode-MCP-Build und Archiv erfolgreich; Links hell/dunkel/AX geprüft. Vollständiger URL-Pfad wurde im Simulator nicht live bestätigt, Domain und Quell-URL sind geprüft.
+- Alte ungenutzte OverviewView und .DS_Store entfernt; signierte Archive und historische Prüfnachweise erhalten.
 
-App Store Connect leitete beim Öffnen von Vertrieb zur Anmeldung mit authResult=FAILED weiter. Eine erneute Anmeldung ist nötig. Danach sind Build 7, aktuelle Texte, Preis, Kontakt, Inhaltsrechte, Altersfreigabe und Datenschutzangaben im Portal zu prüfen bzw. zu speichern. Die Datenschutz-URL muss auf eine veröffentlichte Seite führen. Die bisher festgelegte manuelle Veröffentlichung bleibt bestehen.
+## Store-Vorbereitung abgeschlossen
 
-Keine Einreichung oder Veröffentlichung bestätigt.
+Build 8 und die vier aktuellen Store-Aufnahmen sind gespeichert. Die alte Tab-Leiste erscheint nicht mehr im aktiven Bildsatz.
+
+## Vor Einreichung offen
+
+- Build 8 ist in der Store-Version gespeichert und im Portal bestätigt.
+- Vier aktuelle native Store-Screenshots sind im Portal bestätigt: je zwei für iPhone und iPad, Speicheranalyse vor Einstieg.
+- Datenschutzantworten veröffentlichen: Apples Bestätigung beinhaltet Richtigkeit, Gesetzeskonformität und Aktualisierungspflicht.
+- Inhaltsrechte-Erklärung: automatische Freigabeprüfung hat „keine Drittanbieterinhalte“ abgelehnt, weil nutzergewählte Dateien fremder Herkunft angezeigt werden können; spezifische Zustimmung bzw. Einordnung durch den Eigentümer nötig.
+- Eigentümer pflegt den Inhalt der Datenschutzseite für OrbitDisk.
+
+Manuelle Veröffentlichung bleibt eingestellt. Keine App-Review-Einreichung, Apple-Genehmigung oder Veröffentlichung bestätigt.
+
+Die automatische Freigabeprüfung hat auch „Zur Prüfung hinzufügen“ abgelehnt, solange Inhaltsrechte- und Datenschutzbestätigung offen sind. Kein Versuch, diese Sperre zu umgehen.

@@ -161,6 +161,10 @@ struct ScanPickerView: View {
                     }
                 }
                 Section {
+                    Link("Datenschutzerklärung", destination: URL(string: "https://www.mobilebox-consulting.de/datenschutzerkl%C3%A4rung-privacy-policy/")!)
+                    Link("Support kontaktieren", destination: URL(string: "mailto:info@mobilebox-consulting.de")!)
+                }
+                Section {
                     Label("Lokal und privat", systemImage: "lock.shield")
                     Text("Wähle einen Ordner auf deinem Gerät, in iCloud Drive oder auf einem verbundenen Laufwerk. Bei Cloud-Dateien kann das Laden Zeit benötigen.")
                         .foregroundStyle(.secondary)
