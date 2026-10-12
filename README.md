@@ -51,6 +51,10 @@ Historische Feedback-Nachweise und Änderungen sind unter `docs/feedback-build*.
 - Englische Übersetzung und vollständige Accessibility-Prüfung
 - Geräteprüfung und App-Store-Vorbereitung
 
+## Datenschutztexte
+
+Für die Homepage: [Deutsch](docs/privacy/de.md) · [English](docs/privacy/en.md).
+
 ## Lizenz
 
 Noch nicht festgelegt.
