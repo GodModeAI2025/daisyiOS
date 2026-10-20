@@ -58,3 +58,7 @@ Für die Homepage: [Deutsch](docs/privacy/de.md) · [English](docs/privacy/en.md
 ## Lizenz
 
 Noch nicht festgelegt.
+
+### Native Mac-Version
+
+Die macOS-Version ab macOS27 verwendet das Scheme `OrbitDiskMac` im selben XcodeGen-Projekt. Sie bietet Seitenleiste, anpassbare Analyseansicht, Dateiinspektor, Ordner-Drop, Cmd-O, Finder-Anzeige und QuickLook. Build1.0(9) ist für die interne TestFlight-Gruppe freigegeben; die öffentliche Mac-Veröffentlichung steht noch aus. Siehe [Prüfstand und Grenzen](docs/macos-build9-validation.md).

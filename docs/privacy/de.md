@@ -1,6 +1,6 @@
 # Datenschutzhinweise für OrbitDisk
 
-Stand: 12. Oktober 2026
+Stand: 20. Oktober 2026
 
 ## Verantwortlicher und Kontakt
 
@@ -9,11 +9,11 @@ Augustenburgstrasse 88
 76229 Karlsruhe, Deutschland  
 E-Mail: [info@mobilebox-consulting.de](mailto:info@mobilebox-consulting.de)
 
-Diese Hinweise betreffen OrbitDisk für iPhone und iPad. Ergänzende Informationen zur Nutzung unserer Website und zur Kontaktaufnahme findest du in unserer [allgemeinen Datenschutzerklärung](https://www.mobilebox-consulting.de/datenschutzerkl%C3%A4rung-privacy-policy/).
+Diese Hinweise betreffen OrbitDisk für iPhone, iPad und Mac. Ergänzende Informationen zur Nutzung unserer Website und zur Kontaktaufnahme findest du in unserer [allgemeinen Datenschutzerklärung](https://www.mobilebox-consulting.de/datenschutzerkl%C3%A4rung-privacy-policy/).
 
 ## Lokale Analyse deiner Dateien
 
-OrbitDisk analysiert Ordner, die du über die native Dateien-Auswahl ausdrücklich auswählst. Die App verwendet die vom Betriebssystem und Dateianbieter gewährten Zugriffsrechte. Sie kann weder das gesamte iPhone-Dateisystem noch private Daten anderer Apps beliebig durchsuchen.
+OrbitDisk analysiert Ordner, die du über die native Ordnerauswahl ausdrücklich auswählst oder auf dem Mac per Drag-and-drop freigibst. Die App verwendet die vom Betriebssystem und Dateianbieter gewährten Zugriffsrechte. Auf iPhone und iPad kann sie weder das gesamte Dateisystem noch private Daten anderer Apps beliebig durchsuchen. Auf dem Mac bleibt sie auf die freigegebenen Speicherorte und die zusätzlichen Schutzregeln von macOS beschränkt.
 
 Für die Speicheranalyse verarbeitet die App lokal Datei- und Ordnernamen, Speicherorte, Dateigrößen sowie Informationen über die Verzeichnisstruktur. Die Duplikatprüfung liest Dateiinhalte und berechnet lokal SHA-256-Prüfsummen. Änderungszeitpunkte und weitere Dateimetadaten helfen dabei, Dateien vor einer Entfernung erneut zu prüfen. Die Aufräumprüfung bewertet Namen und Speicherorte auf mögliche temporäre Dateien, Logs, Caches oder andere entbehrliche Inhalte.
 
@@ -23,7 +23,7 @@ Dateiinhalte, Prüfsummen und Analyseergebnisse werden von OrbitDisk nicht an un
 
 OrbitDisk speichert die Namen zuletzt analysierter Ordner und vom Betriebssystem bereitgestellte Verweise auf diese Ordner in den lokalen App-Einstellungen. Damit kannst du einen Ordner erneut auswählen, soweit der Dateianbieter den Zugriff weiterhin erlaubt. Die App speichert dafür keine vollständige Kopie deiner Ordner.
 
-Analyseergebnisse und Duplikat-Prüfsummen werden nicht als dauerhafte Analyse-Datenbank angelegt. Sie werden während der jeweiligen Nutzung im Arbeitsspeicher verarbeitet. Lokale Ordnerverweise bleiben über App-Neustarts hinweg erhalten. Sie werden entfernt, wenn die App mit ihren Daten gelöscht wird; ein bloßes Auslagern der App kann deren Daten erhalten. Sicherungen und eine mögliche Wiederherstellung von App-Daten richten sich nach deinen Apple- und Geräteeinstellungen.
+Analyseergebnisse und Duplikat-Prüfsummen werden nicht als dauerhafte Analyse-Datenbank angelegt. Sie werden während der jeweiligen Nutzung im Arbeitsspeicher verarbeitet. Lokale Ordnerverweise bleiben über App-Neustarts hinweg erhalten. Auf dem Mac nutzt OrbitDisk dafür Security-Scoped Bookmarks innerhalb der App Sandbox. Beim bloßen Entfernen der Mac-App können lokale App-Daten erhalten bleiben; entferne bei Bedarf auch die zugehörigen App-Daten. Sie werden entfernt, wenn die App mit ihren Daten gelöscht wird; ein bloßes Auslagern der App kann deren Daten erhalten. Sicherungen und eine mögliche Wiederherstellung von App-Daten richten sich nach deinen Apple- und Geräteeinstellungen.
 
 Die Dateien im ausgewählten Ordner werden durch das Löschen der App nicht automatisch gelöscht.
 

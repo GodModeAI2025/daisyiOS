@@ -30,3 +30,12 @@ Build 8 und die vier aktuellen Store-Aufnahmen sind gespeichert. Die alte Tab-Le
 - [Einreichung in App Store Connect](https://appstoreconnect.apple.com/apps/6821645213/distribution/reviewsubmissions/details/eee3027f-e93d-40be-9e25-c670bd4081a6).
 
 Manuelle Veröffentlichung bleibt eingestellt. Apple-Genehmigung und öffentliche Veröffentlichung stehen aus. Der Inhalt der verlinkten Datenschutzseite wird weiterhin vom Eigentümer gepflegt; dessen Aktualisierung wurde hier nicht bestätigt.
+
+## Mac-Erweiterung (20. Oktober 2026)
+
+- Bestehender App-Eintrag6821645213 enthält zusätzlich macOS1.0. iOS1.0Build8 steht inzwischen auf „Bereit für Vertrieb“.
+- Native Mac-App1.0(9) mit optimiertem Fenster, Sandbox-Zugriff, Drag/drop, Finder, QuickLook und gemeinsamem Analyse-/Löschkern gebaut, archiviert und hochgeladen.
+- TestFlight-Verarbeitung abgeschlossen; Build9 ist in „Mark – Intern“ auf **Im Test** bestätigt.
+- Build-ID `11c5eff7-aa1a-4954-9470-7df220f483f4`.
+- Mac-Store-Beschreibung und Review-Anleitung gespeichert; manuelle Veröffentlichung aktiv. Mac-Screenshots und Mac-App-Review-Einreichung stehen aus.
+- Weitere Tests wurden ausdrücklich gestoppt. Details und Grenzen: [macOS-Prüfstand](../docs/macos-build9-validation.md).
