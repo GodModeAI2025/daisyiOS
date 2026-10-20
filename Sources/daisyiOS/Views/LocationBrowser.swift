@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -26,3 +27,5 @@ struct LocationBrowser: UIViewControllerRepresentable {
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { parent.dismiss() }
     }
 }
+
+#endif

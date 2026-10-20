@@ -7,7 +7,6 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    IPHONEOS_DEPLOYMENT_TARGET: "27.0"
 targets:
   daisyiOS:
     type: application
@@ -46,7 +45,55 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+  OrbitDiskMac:
+    entitlements:
+      path: Sources/daisyiOS/Resources/OrbitDisk-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-write: true
+        com.apple.security.files.bookmarks.app-scope: true
+    type: application
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources/daisyiOS
+        excludes: ["**/.DS_Store", "Resources/OrbitDisk-macOS.entitlements"]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.godmodeai.daisyiOS
+        PRODUCT_NAME: OrbitDisk
+        PRODUCT_MODULE_NAME: daisyiOS
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: OrbitDisk
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: 9
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: SP73Z8JWXM
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_USER_SELECTED_FILES: readwrite
+  OrbitDiskMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources/daisyiOSTests
+    dependencies:
+      - target: OrbitDiskMac
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/OrbitDisk.app/Contents/MacOS/OrbitDisk"
+        BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
+  OrbitDiskMac:
+    build:
+      targets:
+        OrbitDiskMac: all
+    test:
+      targets: [OrbitDiskMacTests]
   daisyiOS:
     build:
       targets:

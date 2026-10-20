@@ -4,7 +4,7 @@ struct CosmicBackdrop: View {
     @Environment(\.colorScheme) private var scheme
     var body: some View {
         ZStack {
-            Color(uiColor: .systemGroupedBackground)
+            Color.orbitBackground
             RadialGradient(colors: [.indigo.opacity(scheme == .dark ? 0.32 : 0.14), .clear], center: .topLeading, startRadius: 0, endRadius: 650)
             RadialGradient(colors: [.cyan.opacity(scheme == .dark ? 0.16 : 0.10), .clear], center: .bottomTrailing, startRadius: 0, endRadius: 500)
         }.ignoresSafeArea().accessibilityHidden(true)
@@ -13,7 +13,7 @@ struct CosmicBackdrop: View {
 struct CosmicCard: ViewModifier {
     func body(content: Content) -> some View {
         content.padding(20)
-            .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.92), in: RoundedRectangle(cornerRadius: 28))
+            .background(Color.orbitCard.opacity(0.92), in: RoundedRectangle(cornerRadius: 28))
             .overlay { RoundedRectangle(cornerRadius: 28).stroke(LinearGradient(colors: [.indigo.opacity(0.4), .cyan.opacity(0.2), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1) }
     }
 }
@@ -56,7 +56,31 @@ struct OrbitOptionLabel: View {
             Text(value).font(.body.weight(.medium)).foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }.padding(14)
-            .background(Color(uiColor: .tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+            .background(Color.orbitControl, in: RoundedRectangle(cornerRadius: 14))
             .contentShape(Rectangle())
+    }
+}
+
+extension Color {
+    static var orbitBackground: Color {
+        #if os(macOS)
+        Color(nsColor: .windowBackgroundColor)
+        #else
+        Color(uiColor: .systemGroupedBackground)
+        #endif
+    }
+    static var orbitCard: Color {
+        #if os(macOS)
+        Color(nsColor: .controlBackgroundColor)
+        #else
+        Color(uiColor: .secondarySystemGroupedBackground)
+        #endif
+    }
+    static var orbitControl: Color {
+        #if os(macOS)
+        Color(nsColor: .controlColor)
+        #else
+        Color(uiColor: .tertiarySystemGroupedBackground)
+        #endif
     }
 }

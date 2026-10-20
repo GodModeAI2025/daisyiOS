@@ -1,6 +1,10 @@
 import SwiftUI
 import QuickLook
+#if os(macOS)
+import AppKit
+#endif
 
+#if os(iOS)
 struct FolderDetailView: View {
     let node: FileNode
     var title: String? = nil
@@ -43,9 +47,9 @@ struct FolderDetailView: View {
                             Text("\(current.fileCount) Dateien · \(max(0, current.directoryCount - 1)) Ordner")
                                 .font(.subheadline).monospacedDigit()
                         }.cosmicCard()
-                        FileActionPanel(node: selected.flatMap { result.find($0.url) } ?? current, result: result, isSelection: selected != nil) {
+                        FileActionPanel(node: selected.flatMap { result.find($0.url) } ?? current, result: result, isSelection: selected != nil, onDelete: {
                             withAnimation(reduceMotion ? nil : .spring(response: 0.4)) { selected = nil }
-                        }
+                        })
                         .id(selected?.id ?? current.id)
                         .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 12)))
                         .id("file-actions")
@@ -90,12 +94,15 @@ struct FolderDetailView: View {
     }
 }
 
+#endif
+
 struct FolderContents: View {
     let node: FileNode
     let result: ScanResult
     let query: String
     @Binding var selected: FileNode?
     let batch: BatchSelection
+    var onOpenFolder: ((FileNode) -> Void)? = nil
     @State private var selecting = false
     @State private var visibleChildren: [FileNode] = []
     @State private var preparing = true
@@ -141,7 +148,7 @@ struct FolderContents: View {
                     HStack(alignment: .top, spacing: 10) {
                         if selecting { SelectionCheckbox(node: child, selection: batch) }
                         if child.isDirectory {
-                            NavigationLink { FolderDetailView(node: child, result: result) } label: {
+                            folderLink(child) {
                                 VStack(alignment: .trailing, spacing: 8) {
                                     FileRow(node: child).frame(maxWidth: .infinity, alignment: .leading)
                                     HStack(spacing: 6) {
@@ -160,6 +167,12 @@ struct FolderContents: View {
                     }
                     Divider()
                 }
+                #if os(macOS)
+                .contextMenu {
+                    Button("Im Finder zeigen") { NSWorkspace.shared.activateFileViewerSelecting([child.url]) }
+                    Button("Dateiaktionen anzeigen") { select(child) }
+                }
+                #endif
             }
         }.cosmicCard()
         .task(id: "\(node.id)-\(node.aggregateSize)-\(node.fileCount)-\(node.directoryCount)-\(node.children.count)-\(query)-\(filter.rawValue)-\(sort.rawValue)") {
@@ -177,6 +190,13 @@ struct FolderContents: View {
             preparing = false
         }
     }
+    @ViewBuilder private func folderLink<Label: View>(_ child: FileNode, @ViewBuilder label: () -> Label) -> some View {
+        #if os(macOS)
+        Button { onOpenFolder?(child) } label: { label() }
+        #else
+        NavigationLink { FolderDetailView(node: child, result: result) } label: { label() }
+        #endif
+    }
     private func select(_ child: FileNode) {
         withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.42, dampingFraction: 0.8)) { selected = child }
     }
@@ -188,12 +208,21 @@ struct FileActionPanel: View {
     let result: ScanResult
     var isSelection = false
     var allowsDeletion = true
+    var onOpenFolder: ((FileNode) -> Void)? = nil
     var onDelete: () -> Void = {}
     @State private var previewURL: URL?
     @State private var showBrowser = false
     @State private var pendingDeletion: FileNode?
     @State private var deletionError: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var canPreview: Bool {
+        #if os(macOS)
+        // macOS Quick Look supplies its own fallback for unsupported formats.
+        true
+        #else
+        QLPreviewController.canPreview(node.url as NSURL)
+        #endif
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top) {
@@ -205,14 +234,33 @@ struct FileActionPanel: View {
                 }
             }
             if node.isDirectory, isSelection {
+                #if os(macOS)
+                if let onOpenFolder {
+                    Button { onOpenFolder(node) } label: {
+                        Label("Unterordner öffnen", systemImage: "folder.badge.plus")
+                    }.buttonStyle(OrbitActionStyle(prominent: true))
+                } else {
+                    NavigationLink { MacFolderView(result: result, initialFolderURL: node.url) } label: {
+                        Label("Unterordner öffnen", systemImage: "folder.badge.plus")
+                    }.buttonStyle(OrbitActionStyle(prominent: true))
+                }
+                #else
                 NavigationLink { FolderDetailView(node: node, result: result) } label: {
                     Label("Unterordner in OrbitDisk öffnen", systemImage: "folder.badge.plus")
                 }.buttonStyle(OrbitActionStyle(prominent: true))
+                #endif
             }
+            #if os(macOS)
+            Text(node.url.path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+            Button { NSWorkspace.shared.activateFileViewerSelecting([node.url]) } label: {
+                Label("Im Finder zeigen", systemImage: "folder")
+            }.buttonStyle(OrbitActionStyle())
+            #else
             Button { showBrowser = true } label: {
                 Label("Speicherort in Dateien anzeigen", systemImage: "folder")
             }.buttonStyle(OrbitActionStyle())
-            if !node.isDirectory, QLPreviewController.canPreview(node.url as NSURL) {
+            #endif
+            if !node.isDirectory, canPreview {
                 Button { previewURL = node.url } label: { Label("Dateivorschau (Quick Look)", systemImage: "eye") }
                     .buttonStyle(OrbitActionStyle())
             }
@@ -221,13 +269,17 @@ struct FileActionPanel: View {
                     Label(result.isDeleting ? "Wird gelöscht …" : "Löschen …", systemImage: "trash")
                 }.buttonStyle(OrbitActionStyle()).disabled(result.isDeleting)
             }
+            #if os(iOS)
             Text(result.isAppContainer && FileLocations.browserDirectory(for: node, root: result.root.url, isAppContainer: true) != (node.isDirectory ? node.url : node.url.deletingLastPathComponent()) ? "Interne App-Ordner sind in Dateien nicht sichtbar. Hier öffnet sich der Dokumente-Bereich." : "Öffnet die Dateien-Auswahl am gewünschten Speicherort, sofern verfügbar.")
                 .font(.footnote).foregroundStyle(.secondary)
+            #endif
         }.frame(maxWidth: .infinity, alignment: .leading).cosmicCard()
         .quickLookPreview($previewURL)
+        #if os(iOS)
         .sheet(isPresented: $showBrowser) {
             LocationBrowser(startingDirectory: FileLocations.browserDirectory(for: node, root: result.root.url, isAppContainer: result.isAppContainer))
         }
+        #endif
         .alert("Wirklich löschen?", item: $pendingDeletion) { target in
             Button("Abbrechen", role: .cancel) {}
             Button("Endgültig löschen", role: .destructive) {

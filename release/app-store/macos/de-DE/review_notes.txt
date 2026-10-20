@@ -1,0 +1,11 @@
+OrbitDisk for Mac is the native macOS version in the existing OrbitDisk app record. Requires macOS 27 or later. No account or sign-in is required.
+
+Choose a folder or mounted drive with File > Open (Cmd-O), or drag a folder into the app window. The app uses App Sandbox and user-selected read/write access. Persistent access uses security-scoped bookmarks; macOS protections and file-provider limitations still apply. It does not request Full Disk Access or scan arbitrary protected data.
+
+Progress shows counts, elapsed time and cancellation. The sidebar keeps recent folder references. Folder segments in the orb and folder rows open the next level; the center and Back return. Folders precede files; filter/sort and search refine the list. The inspector provides Finder reveal, native Quick Look, and confirmed deletion. macOS Quick Look handles file formats and fallback previews.
+
+Folder tools provide recursive cleanup candidates and SHA-256 duplicate matching. No automatic selection or deletion. Root/path/link protections and duplicate-content revalidation remain active. Deletion is permanent within the app and may sync via cloud providers; every removal requires confirmation.
+
+The interface supports multiple independent windows, system appearance, reduced motion, and resizable analysis/inspector areas. External storage is optional: local test folders work.
+
+Please review the Mac version normally and keep release manual. Existing iOS release should remain unchanged.

@@ -26,5 +26,21 @@
     "height": 2752,
     "mode": "RGB",
     "source": "Actual Build 8 iOS 27 simulator capture; synthetic local files via native document picker"
+  },
+  {
+    "path": "macos/01-speicheranalyse-hell.png",
+    "width": 1440,
+    "height": 900,
+    "mode": "RGB",
+    "source": "Xcode MCP RenderPreview on macOS 27.2; shared MacFolderView with synthetic Studio folder data and preview sidebar; no user files; export from capped 1500x937 preview to App Store 1440x900",
+    "appearance": "Light Appearance"
+  },
+  {
+    "path": "macos/02-speicheranalyse-dunkel.png",
+    "width": 1440,
+    "height": 900,
+    "mode": "RGB",
+    "source": "Xcode MCP RenderPreview on macOS 27.2; shared MacFolderView with synthetic Studio folder data and preview sidebar; no user files; export from capped 1500x937 preview to App Store 1440x900",
+    "appearance": "Dark Appearance"
   }
 ]

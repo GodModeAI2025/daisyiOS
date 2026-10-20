@@ -40,7 +40,7 @@ struct SunburstChart: View {
                             RingWedge(start: segment.start, end: segment.end,
                                       innerFraction: 0.39 + Double(segment.depth) * 0.19,
                                       outerFraction: 0.57 + Double(segment.depth) * 0.19)
-                                .stroke(Color(uiColor: .systemBackground).opacity(0.8), lineWidth: 2)
+                                .stroke(Color.orbitBackground.opacity(0.8), lineWidth: 2)
                         }
                         .opacity(selected == nil || active ? 1 : 0.45)
                         .scaleEffect(active && !reduceMotion ? 1.045 : 1)

@@ -1,0 +1,34 @@
+Sieh, was in deinen Ordnern Platz braucht.
+OrbitDisk macht Speicherbedarf sichtbar – mit einem interaktiven Ringdiagramm, klaren Größenangaben und direkten Dateiaktionen.
+
+ORDNER ENTDECKEN
+Wähle einen Ordner oder verbundenen Datenträger über die native Ordnerauswahl – oder ziehe ihn in das OrbitDisk-Fenster. Du kannst lokale Ordner und verfügbare Cloud-Ordner analysieren. Erkunde Unterordner und finde große Einträge in der nach Größe sortierten Liste.
+
+SPEICHER SICHTBAR MACHEN
+Klicke auf einen Ordner im Ringdiagramm, um seinen Inhalt zu öffnen. Die Mitte führt zurück. In der Liste stehen Ordner vor Dateien; Filter, Größen- und Namenssortierung helfen beim Erkunden. Dateien lassen sich für Vorschau und Aktionen auswählen.
+
+ANALYSE MIT FORTSCHRITT
+Die Ladeanzeige zeigt erfasste Dateien, Ordner und Laufzeit. Die Analyse lässt sich abbrechen. Nicht lesbare Einträge werden ausdrücklich gemeldet. Es gibt keine feste Dateigrenze. Sehr kleine Diagrammsegmente werden grau dargestellt; alle lesbaren Einträge stehen in der Liste.
+
+DATEIEN PRÜFEN UND AUFRÄUMEN
+Starte Quick Look bei unterstützten Dateien. Zeige ausgewählte Einträge direkt im Finder an. Im ausblendbaren Inspektor stehen Pfad, Größe und Dateiaktionen bereit. Lösche ausgewählte Dateien oder Ordner erst nach einer ausdrücklichen Sicherheitsabfrage. Die Analyse aktualisiert anschließend ihre Größen und Einträge.
+
+ORDNER PRÜFEN
+„Ordner prüfen“ findet mögliche temporäre Daten, Logs, Caches, Build-Reste und unvollständige Downloads im aktuellen Ordner und darunter. Jeder Vorschlag nennt Grund und Speicherort. Wähle einzelne Funde oder alle Funde aus und entferne die Auswahl nach Sicherheitsabfrage. Nichts wird automatisch gelöscht.
+
+DUPLIKATE FINDEN
+Vergleiche Dateien nach vollständigem Inhalt mit SHA-256. Wähle pro Gruppe die Kopie, die bleiben soll; andere Kopien werden erst nach Bestätigung und erneuter Inhaltsprüfung entfernt. Links und bestimmte Cache-/Build-Bereiche werden ausgelassen. Neue Dateien werden nach erneuter Speicheranalyse erfasst.
+
+LOKAL ANALYSIEREN
+Die App benötigt kein Benutzerkonto und überträgt keine Analyseergebnisse. Cloud-Dateianbieter können Dateien zum Öffnen oder Analysieren bereitstellen oder laden.
+
+WICHTIG ZU WISSEN
+• OrbitDisk verwendet die App Sandbox und analysiert ausdrücklich freigegebene Ordner. macOS-Schutzregeln und Dateiberechtigungen gelten weiterhin.
+• Geschützte oder nicht verfügbare Inhalte können unlesbar bleiben und werden entsprechend gemeldet.
+• Das Löschen auf einem externen Datenträger betrifft dessen Speicher; synchronisierte Löschungen können andere Geräte betreffen.
+• Gespeicherte Ordnerzugriffe können eine erneute Freigabe erfordern, etwa nach Änderungen am Speicherort.
+
+FÜR DEN MAC GEMACHT
+Anpassbares Fenster mit Seitenleiste, Analysebereich und Dateiinspektor. Öffne Ordner mit Cmd-O und arbeite in mehreren unabhängigen Fenstern.
+
+Für Mac ab macOS 27.

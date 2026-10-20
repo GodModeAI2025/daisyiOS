@@ -10,6 +10,14 @@ actor AccessStore {
         var id: Data { bookmark }
     }
 
+    #if os(macOS)
+    private static let creationOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+    private static let resolutionOptions: URL.BookmarkResolutionOptions = [.withSecurityScope, .withoutUI]
+    #else
+    private static let creationOptions: URL.BookmarkCreationOptions = []
+    private static let resolutionOptions: URL.BookmarkResolutionOptions = []
+    #endif
+
     private let defaults: UserDefaults
     private let storageKey = "daisyiOS.scanned-folders"
     private(set) var folders: [Folder]
@@ -25,10 +33,10 @@ actor AccessStore {
     }
 
     func add(name: String, url: URL) throws {
-        let bookmark = try url.bookmarkData()
+        let bookmark = try url.bookmarkData(options: Self.creationOptions)
         folders.removeAll { folder in
             var stale = false
-            let savedURL = try? URL(resolvingBookmarkData: folder.bookmark, relativeTo: nil, bookmarkDataIsStale: &stale)
+            let savedURL = try? URL(resolvingBookmarkData: folder.bookmark, options: Self.resolutionOptions, relativeTo: nil, bookmarkDataIsStale: &stale)
             return savedURL?.standardizedFileURL == url.standardizedFileURL
         }
         folders.append(Folder(name: name, bookmark: bookmark))
@@ -42,9 +50,11 @@ actor AccessStore {
 
     func url(for folder: Folder) throws -> URL {
         var stale = false
-        let url = try URL(resolvingBookmarkData: folder.bookmark, relativeTo: nil, bookmarkDataIsStale: &stale)
+        let url = try URL(resolvingBookmarkData: folder.bookmark, options: Self.resolutionOptions, relativeTo: nil, bookmarkDataIsStale: &stale)
         if stale {
-            let refreshed = try url.bookmarkData()
+            let lease = FolderAccessLease(url: url)
+            defer { withExtendedLifetime(lease) {} }
+            let refreshed = try url.bookmarkData(options: Self.creationOptions)
             folders = folders.map { $0.id == folder.id ? Folder(name: $0.name, bookmark: refreshed) : $0 }
             persist()
         }
