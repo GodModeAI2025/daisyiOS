@@ -24,3 +24,11 @@ Release-Archiv, Upload, Verarbeitung und Testerfreigabe werden separat dokumenti
 - Build verarbeitet: UUID11c5eff7-aa1a-4954-9470-7df220f483f4. TestFlight-Gruppe Mark – Intern zeigt1.0(9), macOS, **Im Test**, 90Tage. Gruppe enthält bestehenden Tester mark_zimmermann@mac.com, keine neuen externen Tester.
 - Mac-Beschreibung und Mac-Review-Hinweise im ASC-Entwurf gespeichert; manuelle Veröffentlichung aktiv. Keine Mac-App-Review-Einreichung oder öffentliche Mac-Verfügbarkeit behauptet. Mac-Store-Screenshots fehlen noch.
 - Read-only-Codeprüfung: fehlende Ordnernavigation bei Aufräumfunden, enge Quick-Look-Typenliste und synchrone Drop-Metadatenabfrage korrigiert. Korrekturen im finalen Release-Archiv enthalten.
+
+## Mac-App-Review übermittelt
+
+Am 20. Oktober 2026 um 19:52 Europe/Berlin hat Apple die Mac-Einreichung angenommen. Portal: **Warten auf Prüfung**, „1 Element übermittelt“. Übermittlungs-ID: `b717b9b6-dad7-4cb8-9238-d8f08b316a63`.
+
+Zwei Mac-Bilder sind unter Screenshots gespeichert und im Portal auf „2 von 10 App-Bildschirmfotos“ bestätigt: 1440×900, RGB, helle und dunkle Darstellung. Quelle ist Xcode MCP RenderPreview auf macOS27.2 mit gemeinsamen App-Ansichten und ausschließlich synthetischen Ordnerdaten; keine Aufnahme einer physischen TestFlight-Installation. Xcode begrenzt den Vorschau-Snapshot auf1500×937, anschließend Export in Apples unterstützte1440×900. Die erste Einstiegsaufnahme mit lokalen Recent-Einträgen wurde verworfen und nicht veröffentlicht.
+
+Build1.0(9), Mac-Beschreibung und Review-Hinweise sind gespeichert; manuelle Veröffentlichung bleibt aktiv. Die Mac-Version ist noch nicht öffentlich freigegeben. Weitere Tests bleiben auf Nutzerwunsch gestoppt. Die bestehende iOS-Version bleibt „Bereit für Vertrieb“.

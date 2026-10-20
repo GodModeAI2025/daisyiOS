@@ -39,3 +39,11 @@ Manuelle Veröffentlichung bleibt eingestellt. Apple-Genehmigung und öffentlich
 - Build-ID `11c5eff7-aa1a-4954-9470-7df220f483f4`.
 - Mac-Store-Beschreibung und Review-Anleitung gespeichert; manuelle Veröffentlichung aktiv. Mac-Screenshots und Mac-App-Review-Einreichung stehen aus.
 - Weitere Tests wurden ausdrücklich gestoppt. Details und Grenzen: [macOS-Prüfstand](../docs/macos-build9-validation.md).
+
+### Mac-Einreichung bestätigt (20. Oktober 2026)
+
+- Build9 gespeichert, zwei geprüfte Mac-Bilder in heller/dunkler Darstellung hochgeladen und auf2/10 bestätigt.
+- Apple bestätigt **Warten auf Prüfung** für macOS1.0(9).
+- Übermittlungs-ID: `b717b9b6-dad7-4cb8-9238-d8f08b316a63`.
+- [Mac-Einreichung](https://appstoreconnect.apple.com/apps/6821645213/distribution/reviewsubmissions/details/b717b9b6-dad7-4cb8-9238-d8f08b316a63).
+- Manuelle Veröffentlichung bleibt eingestellt; TestFlight „Mark – Intern“ bleibt „Im Test“. Keine öffentliche Mac-Verfügbarkeit bestätigt.
